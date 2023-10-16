@@ -1,6 +1,6 @@
 
 # [UROP] MBTI Dataset Modeling Project
-
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&random=false&width=435&lines=+%5BUROP%5D+MBTI+Dataset+Modeling+Project)](https://git.io/typing-svg)
 이 저장소는 MBTI(Personality Type) 데이터를 수집하고, MBTI 모델을 구축하며 데이터를 분석하는 프로젝트를 위한 공간입니다.
 
 ## 프로젝트 개요
