@@ -1,5 +1,5 @@
 
-# [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&random=false&width=435&lines=+%5BUROP%5D+MBTI+Dataset+Modeling+Project)](https://git.io/typing-svg)
+# [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&random=false&width=435&lines=+%5BUROP%5D+MBTI+Dataset+Crawling)](https://git.io/typing-svg)
 
 이 저장소는 MBTI(Personality Type) 데이터를 수집을 위한 공간입니다.
 
