@@ -3,7 +3,7 @@
 
 이 저장소는 MBTI(Personality Type) 데이터를 수집을 위한 공간입니다.
 
-## Data crawling In Short
+## [![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=1618F7&random=false&width=435&lines=Data+crawling+In+Short)](https://git.io/typing-svg)
 
 이 repo의 목표는 다음과 같습니다:
 
