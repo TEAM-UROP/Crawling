@@ -123,6 +123,8 @@ class Crwaling:
         comment_writer_list,
         post_dir,
         comment_dir,
+        start_page,
+        end_page,
     ):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # make dataframe of posts
@@ -134,14 +136,16 @@ class Crwaling:
             }
         )
         df_post.to_csv(
-            f"{post_dir}/post_{current_time}.csv", index=False, encoding="utf-8-sig"
+            f"{post_dir}/post_{current_time}_({start_page} to {end_page}).csv",
+            index=False,
+            encoding="utf-8-sig",
         )
         # make dataframe of comments
         df_comment = pd.DataFrame(
             {"comments": comment_list, "comments_writer": comment_writer_list}
         )
         df_comment.to_csv(
-            f"{comment_dir}/comment_{current_time}.csv",
+            f"{comment_dir}/comment_{current_time}_({start_page} to {end_page}).csv",
             index=False,
             encoding="utf-8-sig",
         )
@@ -198,4 +202,6 @@ if __name__ == "__main__":
         comment_writer_list,
         post_dir,
         comment_dir,
+        start_page,
+        end_page,
     )
