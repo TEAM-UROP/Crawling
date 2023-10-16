@@ -16,6 +16,8 @@ def get_args_parser():
     parser.add_argument("--naver_password", type=str, help="your naver password")
     parser.add_argument("--start_page", type=str, help="start page number")
     parser.add_argument("--end_page", type=str, help="end page number")
+    parser.add_argument("--post_dir", type=str, help="post directory")
+    parser.add_argument("--comment_dir", type=str, help="comment directory")
     return parser
 
 
@@ -75,6 +77,7 @@ class Crwaling:
         else:
             for i in comment_writer:
                 comment_writer_list.append(i.text)
+        return comment_writer_list
 
     def runCrawling(self, start_page, end_page):
         # move to the cafe
@@ -118,24 +121,31 @@ class Crwaling:
         comment_with_post_list,
         comment_list,
         comment_writer_list,
+        post_dir,
+        comment_dir,
     ):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         # make dataframe of posts
         df_post = pd.DataFrame(
             {
-                "author": content_writer_list,
                 "contents": content_list,
+                "author": content_writer_list,
                 "comments": comment_with_post_list,
             }
         )
-        df_post.to_csv(f"post_{current_time}.csv", index=False, encoding="utf-8-sig")
+        df_post.to_csv(
+            f"{post_dir}/post_{current_time}.csv", index=False, encoding="utf-8-sig"
+        )
         # make dataframe of comments
         df_comment = pd.DataFrame(
             {"comments": comment_list, "comments_writer": comment_writer_list}
         )
         df_comment.to_csv(
-            f"comment_{current_time}.csv", index=False, encoding="utf-8-sig"
+            f"{comment_dir}/comment_{current_time}.csv",
+            index=False,
+            encoding="utf-8-sig",
         )
+
         print("dataframe is made")
 
 
@@ -155,6 +165,13 @@ if __name__ == "__main__":
     naver_password = args.naver_password
     start_page = int(args.start_page)
     end_page = int(args.end_page)
+    post_dir = args.post_dir
+    comment_dir = args.comment_dir
+
+    if not os.path.exists(post_dir):
+        os.makedirs(post_dir)
+    if not os.path.exists(comment_dir):
+        os.makedirs(comment_dir)
 
     # set driver
     driver = webdriver.Chrome()
@@ -179,4 +196,6 @@ if __name__ == "__main__":
         comment_with_post_list,
         comment_list,
         comment_writer_list,
+        post_dir,
+        comment_dir,
     )
