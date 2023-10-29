@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 import time
 import pyperclip
 from selenium.webdriver.common.keys import Keys
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 import datetime
 import argparse
