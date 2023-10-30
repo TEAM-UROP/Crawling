@@ -4,20 +4,32 @@ from selenium.webdriver.common.by import By
 import time
 import pyperclip
 from selenium.webdriver.common.keys import Keys
-# from dotenv import load_dotenv
 import os
 import datetime
 import argparse
+from dotenv import load_dotenv
 
 
 def get_args_parser():
+    load_dotenv()
     parser = argparse.ArgumentParser(description="MBTI Crawling")
-    parser.add_argument("--naver_id", type=str, help="your naver id")
-    parser.add_argument("--naver_password", type=str, help="your naver password")
-    parser.add_argument("--start_page", type=str, help="start page number")
-    parser.add_argument("--end_page", type=str, help="end page number")
-    parser.add_argument("--post_dir", type=str, help="post directory")
-    parser.add_argument("--comment_dir", type=str, help="comment directory")
+    parser.add_argument(
+        "--naver_id", default=os.environ.get("MyID"), type=str, help="your naver id"
+    )
+    parser.add_argument(
+        "--naver_password",
+        default=os.environ.get("MyPassword"),
+        type=str,
+        help="your naver password",
+    )
+    parser.add_argument("--start_page", default=4, type=int, help="start page number")
+    parser.add_argument("--end_page", default=11, type=int, help="end page number")
+    parser.add_argument(
+        "--post_dir", default="./data/post", type=str, help="post directory"
+    )
+    parser.add_argument(
+        "--comment_dir", default="./data/comment", type=str, help="comment directory"
+    )
     return parser
 
 
@@ -35,6 +47,13 @@ class Crwaling:
         driver.find_element(By.ID, "pw").send_keys(Keys.CONTROL, "v")
         # click the login button
         driver.find_element(By.ID, "log.login").click()
+
+    def titleLoading(self):
+        title = driver.find_element(
+            By.XPATH, '//*[@id="app"]/div/div/div[2]/div[1]/div[1]/div/h3'
+        )
+        title_list.append(title.text)
+        return title_list
 
     def contentLoading(self):
         content = driver.find_elements(By.CSS_SELECTOR, ".se-fs-.se-ff-")
@@ -85,13 +104,41 @@ class Crwaling:
         # move to the first 사랑방
         driver.find_element(By.ID, "menuLink18").click()
         # move to the start page
+        if start_page > 10:
+            click_count = start_page // 10
+            for i in range(1, click_count + 1):
+                if i == 1:
+                    driver.switch_to.frame("cafe_main")
+                    driver.find_element(
+                        By.XPATH, '//*[@id="main-area"]/div[6]/a[11]'
+                    ).click()
+                else:
+                    driver.find_element(
+                        By.XPATH, '//*[@id="main-area"]/div[6]/a[12]'
+                    ).click()
         for page_num in range(start_page, end_page + 1):
-            driver.switch_to.frame("cafe_main")
-            driver.find_element(
-                By.XPATH, f'//*[@id="main-area"]/div[6]/a[{page_num}]'
-            ).click()
+            if page_num != start_page or start_page <= 10:
+                driver.switch_to.frame("cafe_main")
+            if page_num == 11 and start_page == 11:
+                None
+            elif start_page != 11 and page_num <= 11:
+                driver.find_element(
+                    By.XPATH, f'//*[@id="main-area"]/div[6]/a[{page_num}]'
+                ).click()
+            elif page_num != start_page and page_num % 10 == 1:
+                driver.find_element(
+                    By.XPATH, f'//*[@id="main-area"]/div[6]/a[{page_num%10+11}]'
+                ).click()
+            elif page_num % 10 == 0:
+                driver.find_element(
+                    By.XPATH, '//*[@id="main-area"]/div[6]/a[11]'
+                ).click()
+            elif 1 < page_num % 10 <= 9:
+                driver.find_element(
+                    By.XPATH, f'//*[@id="main-area"]/div[6]/a[{page_num%10+1}]'
+                ).click()
             time.sleep(1)
-            for post_num in range(1, 16):
+            for post_num in range(1, 3):
                 if post_num != 1:
                     driver.switch_to.frame("cafe_main")
                 # enter the post
@@ -99,14 +146,15 @@ class Crwaling:
                 driver.find_element(By.XPATH, content_path).click()
                 time.sleep(1)
                 # text crwaling
+                title_list = self.titleLoading()
                 content_list = self.contentLoading()
                 content_writer_list = self.contentWriterLoading()
                 comment_with_post_list, comment_list = self.commentsLoading()
                 comment_writer_list = self.commentsWriterLoading()
                 driver.back()
-        # driver.quit()
         print("crawling is done")
         return (
+            title_list,
             content_list,
             content_writer_list,
             comment_with_post_list,
@@ -116,6 +164,7 @@ class Crwaling:
 
     def getDataFrame(
         self,
+        title_list,
         content_list,
         content_writer_list,
         comment_with_post_list,
@@ -130,6 +179,7 @@ class Crwaling:
         # make dataframe of posts
         df_post = pd.DataFrame(
             {
+                "title": title_list,
                 "contents": content_list,
                 "author": content_writer_list,
                 "comments": comment_with_post_list,
@@ -149,7 +199,6 @@ class Crwaling:
             index=False,
             encoding="utf-8-sig",
         )
-
         print("dataframe is made")
 
 
@@ -158,6 +207,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # set list
+    title_list = []
     content_list = []
     content_writer_list = []
     comment_with_post_list = []
@@ -167,15 +217,13 @@ if __name__ == "__main__":
     # set args
     naver_id = args.naver_id
     naver_password = args.naver_password
-    start_page = int(args.start_page)
-    end_page = int(args.end_page)
+    start_page = args.start_page
+    end_page = args.end_page
     post_dir = args.post_dir
     comment_dir = args.comment_dir
 
-    if not os.path.exists(post_dir):
-        os.makedirs(post_dir)
-    if not os.path.exists(comment_dir):
-        os.makedirs(comment_dir)
+    os.makedirs(post_dir, exist_ok=True)
+    os.makedirs(comment_dir, exist_ok=True)
 
     # set driver
     driver = webdriver.Chrome()
@@ -186,6 +234,7 @@ if __name__ == "__main__":
 
     # run crwaling
     (
+        title_list,
         content_list,
         content_writer_list,
         comment_with_post_list,
@@ -195,6 +244,7 @@ if __name__ == "__main__":
 
     # make dataframe
     crwaling.getDataFrame(
+        title_list,
         content_list,
         content_writer_list,
         comment_with_post_list,
