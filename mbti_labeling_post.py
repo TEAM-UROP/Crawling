@@ -45,7 +45,7 @@ class PostToMbti:
         post_df = pd.concat([text_df, contents_copy], axis=0)
 
         #csv 파일 저장
-        post_df.to_csv(".\\data\\labelledpost\\post_2023-10-30_15-20-40_(1 to 10).csv", index=False)
+        post_df.to_csv("D:\\강의\\3-2\\학부연구참여(UROP)\\YongRullNewTown\\Crawling\\data\\newpost\\post_2023-10-30_15-20-40_(1 to 10).csv", index=False)
 
         # 결과 데이터프레임 c 출력
         print(post_df)
@@ -55,8 +55,8 @@ class PostToMbti:
 
         
 if __name__ == "__main__":
-    csv_file_path = ".\\data\\post\\post_2023-10-30_15-20-40_(1 to 10).csv"
-    special_char = ".\\data\\special_char.json"
+    csv_file_path = "D:\\강의\\3-2\\학부연구참여(UROP)\\YongRullNewTown\\Crawling\\data\\post\\post_2023-10-30_15-20-40_(1 to 10).csv"
+    special_char = "D:\\강의\\3-2\\학부연구참여(UROP)\\YongRullNewTown\\Crawling\\data\\special_char.json"
 
     converter = PostToMbti(csv_file_path, special_char)
     converter.process_data()
