@@ -22,8 +22,8 @@ def get_args_parser():
         type=str,
         help="your naver password",
     )
-    parser.add_argument("--start_page", default=4, type=int, help="start page number")
-    parser.add_argument("--end_page", default=11, type=int, help="end page number")
+    parser.add_argument("--start_page", default=1, type=int, help="start page number")
+    parser.add_argument("--end_page", default=30, type=int, help="end page number")
     parser.add_argument(
         "--post_dir", default="./data/post", type=str, help="post directory"
     )
@@ -102,7 +102,9 @@ class Crwaling:
         # move to the cafe
         driver.get("https://cafe.naver.com/mbticafe")
         # move to the first 사랑방
-        driver.find_element(By.ID, "menuLink18").click()
+        global love_room
+        love_room = driver.find_element(By.ID, "menuLink17").text
+        driver.find_element(By.ID, "menuLink17").click()
         # move to the start page
         if start_page > 10:
             click_count = start_page // 10
@@ -138,7 +140,7 @@ class Crwaling:
                     By.XPATH, f'//*[@id="main-area"]/div[6]/a[{page_num%10+1}]'
                 ).click()
             time.sleep(1)
-            for post_num in range(1, 3):
+            for post_num in range(1, 16):
                 if post_num != 1:
                     driver.switch_to.frame("cafe_main")
                 # enter the post
@@ -186,7 +188,7 @@ class Crwaling:
             }
         )
         df_post.to_csv(
-            f"{post_dir}/post_{current_time}_({start_page} to {end_page}).csv",
+            f"{post_dir}/{love_room}_post_{current_time}_({start_page} to {end_page}).csv",
             index=False,
             encoding="utf-8-sig",
         )
@@ -195,7 +197,7 @@ class Crwaling:
             {"comments": comment_list, "comments_writer": comment_writer_list}
         )
         df_comment.to_csv(
-            f"{comment_dir}/comment_{current_time}_({start_page} to {end_page}).csv",
+            f"{comment_dir}/{love_room}_comment_{current_time}_({start_page} to {end_page}).csv",
             index=False,
             encoding="utf-8-sig",
         )
@@ -205,6 +207,7 @@ class Crwaling:
 if __name__ == "__main__":
     parser = get_args_parser()
     args = parser.parse_args()
+    love_room = ""
 
     # set list
     title_list = []
