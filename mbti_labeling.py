@@ -2,6 +2,7 @@ import pandas as pd
 import re
 import json
 import os
+from datetime import datetime
 
 class PostToMbti:
     def __init__(self, csv_file_path, special_char):
@@ -40,7 +41,9 @@ class PostToMbti:
         post_df = pd.concat([text_df, contents_copy], axis=0)
 
         # csv 파일 저장
-        post_df.to_csv('.\data\newpost\post_file.csv', index=False)
+        time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        file_name = f'./data/newpost/post_file_{time}.csv'
+        post_df.to_csv(file_name, index=False)
 
         # 결과 데이터프레임 출력
         print(post_df)
@@ -76,7 +79,9 @@ class CommentsToMbti:
         filtered_df = filtered_df.reindex(columns=new_order)
 
         # csv 파일 저장
-        filtered_df.to_csv('.\data\newcomment\comments_file.csv', index=False)
+        time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        file_name2 = f'./data/newcomment/comment_file_{time}.csv'
+        filtered_df.to_csv(file_name2, index=False)
 
         # 결과 출력
         print(filtered_df)
@@ -84,20 +89,20 @@ class CommentsToMbti:
         print(f'유의미한 값의 비율: {(len(filtered_df) / len(self.df)) * 100:.2f}%')
 
 if __name__ == "__main__":
-    csv_file_path_post_list = ['.\data\post\post_2023-10-30_15-20-40_(1 to 10).csv',
-                               '.\data\post\post_2023-10-30_15-26-54_(11 to 20).csv',
-                               '.\data\post\post_2023-10-30_15-38-32_(21 to 30).csv',
-                               '.\data\post\post_2023-10-30_15-46-01_(31 to 40).csv',
-                               '.\data\post\post_2023-10-30_15-53-01_(41 to 50).csv',
-                               '.\data\post\INTP ♧ ENTP_post_2023-10-31_01-53-55_(1 to 30)']
-    special_char_post = '.\data\special_char.json'
-    csv_file_path_comment_list = ['.\data\comment\comment_2023-10-30_15-20-40_(1 to 10).csv',
-                                  '.\data\comment\comment_2023-10-30_15-26-54_(11 to 20).csv',
-                                  '.\data\comment\comment_2023-10-30_15-38-32_(21 to 30).csv',
-                                  '.\data\comment\comment_2023-10-30_15-46-01_(31 to 40).csv',
-                                  '.\data\comment\comment_2023-10-30_15-53-01_(41 to 50).csv',
-                                  '.\data\comment\INTP ♧ ENTP_comment_2023-10-31_01-53-55_(1 to 30).csv']
-    special_char_comment = '.\data\special_char.json'
+    csv_file_path_post_list = ['./data/post/post_2023-10-30_15-20-40_(1 to 10).csv',
+                               './data/post/post_2023-10-30_15-26-54_(11 to 20).csv',
+                               './data/post/post_2023-10-30_15-38-32_(21 to 30).csv',
+                               './data/post/post_2023-10-30_15-46-01_(31 to 40).csv',
+                               './data/post/post_2023-10-30_15-53-01_(41 to 50).csv',
+                               './data/post/INTP ♧ ENTP_post_2023-10-31_01-53-55_(1 to 30).csv']
+    special_char_post = './data/special_char.json'
+    csv_file_path_comment_list = ['./data/comment/comment_2023-10-30_15-20-40_(1 to 10).csv',
+                                  './data/comment/comment_2023-10-30_15-26-54_(11 to 20).csv',
+                                  './data/comment/comment_2023-10-30_15-38-32_(21 to 30).csv',
+                                  './data/comment/comment_2023-10-30_15-46-01_(31 to 40).csv',
+                                  './data/comment/comment_2023-10-30_15-53-01_(41 to 50).csv',
+                                  './data/comment/INTP ♧ ENTP_comment_2023-10-31_01-53-55_(1 to 30).csv']
+    special_char_comment = './data/special_char.json'
 
     for i in range(len(csv_file_path_post_list)):
         postfile = csv_file_path_post_list[i]
