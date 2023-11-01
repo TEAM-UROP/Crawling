@@ -76,10 +76,13 @@ class Crwaling:
                     '//*[@id="app"]/div/div/div[2]/div[2]/div[3]/div/a/span[2]/strong',
                 )
             except:
-                content_writer = driver.find_element(
-                    By.XPATH,
-                    '//*[@id="app"]/div/div/div[2]/div[2]/div[4]/div/a/span[2]/strong',
-                )
+                try:
+                    content_writer = driver.find_element(
+                        By.XPATH,
+                        '//*[@id="app"]/div/div/div[2]/div[2]/div[4]/div/a/span[2]/strong',
+                    )
+                except:
+                    content_writer = None
         content_writer_list.append(content_writer.text)
         return content_writer_list
 
