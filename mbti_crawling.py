@@ -22,8 +22,8 @@ def get_args_parser():
         type=str,
         help="your naver password",
     )
-    parser.add_argument("--start_page", default=1, type=int, help="start page number")
-    parser.add_argument("--end_page", default=30, type=int, help="end page number")
+    parser.add_argument("--start_page", default=30, type=int, help="start page number")
+    parser.add_argument("--end_page", default=60, type=int, help="end page number")
     parser.add_argument(
         "--post_dir", default="./data/post", type=str, help="post directory"
     )
@@ -70,10 +70,16 @@ class Crwaling:
                 '//*[@id="app"]/div/div/div[2]/div[2]/div[2]/div/a/span[2]/strong',
             )
         except:
-            content_writer = driver.find_element(
-                By.XPATH,
-                '//*[@id="app"]/div/div/div[2]/div[2]/div[3]/div/a/span[2]/strong',
-            )
+            try:
+                content_writer = driver.find_element(
+                    By.XPATH,
+                    '//*[@id="app"]/div/div/div[2]/div[2]/div[3]/div/a/span[2]/strong',
+                )
+            except:
+                content_writer = driver.find_element(
+                    By.XPATH,
+                    '//*[@id="app"]/div/div/div[2]/div[2]/div[4]/div/a/span[2]/strong',
+                )
         content_writer_list.append(content_writer.text)
         return content_writer_list
 
