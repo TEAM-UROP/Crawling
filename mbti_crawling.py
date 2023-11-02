@@ -22,13 +22,16 @@ def get_args_parser():
         type=str,
         help="your naver password",
     )
-    parser.add_argument("--start_page", default=30, type=int, help="start page number")
-    parser.add_argument("--end_page", default=60, type=int, help="end page number")
+    parser.add_argument("--start_page", default=1, type=int, help="start page number")
+    parser.add_argument("--end_page", default=30, type=int, help="end page number")
     parser.add_argument(
         "--post_dir", default="./data/row_post", type=str, help="post directory"
     )
     parser.add_argument(
-        "--comment_dir", default="./data/row_comment", type=str, help="comment directory"
+        "--comment_dir",
+        default="./data/row_comment",
+        type=str,
+        help="comment directory",
     )
     return parser
 
