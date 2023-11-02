@@ -25,11 +25,11 @@ def get_args_parser():
     parser.add_argument("--start_page", default=1, type=int, help="start page number")
     parser.add_argument("--end_page", default=30, type=int, help="end page number")
     parser.add_argument(
-        "--post_dir", default="./data/row_post", type=str, help="post directory"
+        "--post_dir", default="./data/raw_post", type=str, help="post directory"
     )
     parser.add_argument(
         "--comment_dir",
-        default="./data/row_comment",
+        default="./data/raw_comment",
         type=str,
         help="comment directory",
     )
@@ -115,8 +115,8 @@ class Crawling:
         driver.get("https://cafe.naver.com/mbticafe")
         # move to the first 사랑방
         global love_room
-        love_room = driver.find_element(By.ID, "menuLink11").text
-        driver.find_element(By.ID, "menuLink11").click()
+        love_room = driver.find_element(By.ID, "menuLink15").text
+        driver.find_element(By.ID, "menuLink15").click()
         # move to the start page
         if start_page > 10:
             click_count = start_page // 10
@@ -143,7 +143,7 @@ class Crawling:
                 driver.find_element(
                     By.XPATH, f'//*[@id="main-area"]/div[6]/a[{page_num%10+11}]'
                 ).click()
-            elif page_num % 10 == 0:
+            elif start_page <= 11 and page_num % 11 == 0:
                 driver.find_element(
                     By.XPATH, '//*[@id="main-area"]/div[6]/a[11]'
                 ).click()
@@ -160,11 +160,14 @@ class Crawling:
                 driver.find_element(By.XPATH, content_path).click()
                 time.sleep(1)
                 # text crawling
-                title_list = self.titleLoading()
-                content_list = self.contentLoading()
-                content_writer_list = self.contentWriterLoading()
-                comment_with_post_list, comment_list = self.commentsLoading()
-                comment_writer_list = self.commentsWriterLoading()
+                try:
+                    title_list = self.titleLoading()
+                    content_list = self.contentLoading()
+                    content_writer_list = self.contentWriterLoading()
+                    comment_with_post_list, comment_list = self.commentsLoading()
+                    comment_writer_list = self.commentsWriterLoading()
+                except:
+                    pass
                 driver.back()
         print("crawling is done")
         return (
