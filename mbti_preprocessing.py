@@ -64,8 +64,8 @@ def clean_and_save_data2(input_file_path):
     return result
 
 # 처리할 파일 목록
-input_files_comment = ['./data/newcomment/comment_file_2023-11-01_20-19-46.csv']
-input_files_post = ['./data/newpost/post_file_2023-11-01_20-19-46.csv']
+input_files_comment = ['./data/labeled_comment/labeled_comment_2023-11-02_18-52-33.csv']
+input_files_post = ['./data/labeled_post/labeled_post_2023-11-02_18-52-33.csv']
 
 # 결과를 저장할 빈 데이터프레임 생성
 final_result_comment = pd.DataFrame(columns=['mbti', 'comments'])
