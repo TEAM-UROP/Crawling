@@ -112,8 +112,8 @@ class Crwaling:
         driver.get("https://cafe.naver.com/mbticafe")
         # move to the first 사랑방
         global love_room
-        love_room = driver.find_element(By.ID, "menuLink17").text
-        driver.find_element(By.ID, "menuLink17").click()
+        love_room = driver.find_element(By.ID, "menuLink11").text
+        driver.find_element(By.ID, "menuLink11").click()
         # move to the start page
         if start_page > 10:
             click_count = start_page // 10
