@@ -61,7 +61,7 @@ class PostToMbti:
 
         # csv 파일 저장
         time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = f"./data/newpost/post_file_{time}.csv"
+        file_name = f"./data/labeled_post/labeled_post_{time}.csv"
         post_df.to_csv(file_name, index=False, encoding="utf-8-sig")
 
         # 결과 데이터프레임 출력
@@ -118,7 +118,7 @@ class CommentsToMbti:
 
         # csv 파일 저장
         time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name2 = f"./data/newcomment/comment_file_{time}.csv"
+        file_name2 = f"./data/labeled_comment/labeled_comment_{time}.csv"
         filtered_df.to_csv(file_name2, index=False, encoding="utf-8-sig")
 
         # 결과 출력
