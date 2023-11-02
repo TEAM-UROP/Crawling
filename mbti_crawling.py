@@ -36,7 +36,7 @@ def get_args_parser():
     return parser
 
 
-class Crwaling:
+class Crawling:
     def __init__(self):
         pass
 
@@ -159,7 +159,7 @@ class Crwaling:
                 content_path = f'//*[@id="main-area"]/div[4]/table/tbody/tr[{post_num}]/td[1]/div[2]/div/a'
                 driver.find_element(By.XPATH, content_path).click()
                 time.sleep(1)
-                # text crwaling
+                # text crawling
                 title_list = self.titleLoading()
                 content_list = self.contentLoading()
                 content_writer_list = self.contentWriterLoading()
@@ -244,10 +244,10 @@ if __name__ == "__main__":
     driver = webdriver.Chrome()
 
     # naver login
-    crwaling = Crwaling()
-    crwaling.naverLogin(naver_id, naver_password)
+    crawling = Crawling()
+    crawling.naverLogin(naver_id, naver_password)
 
-    # run crwaling
+    # run crawling
     (
         title_list,
         content_list,
@@ -255,10 +255,10 @@ if __name__ == "__main__":
         comment_with_post_list,
         comment_list,
         comment_writer_list,
-    ) = crwaling.runCrawling(start_page, end_page)
+    ) = crawling.runCrawling(start_page, end_page)
 
     # make dataframe
-    crwaling.getDataFrame(
+    crawling.getDataFrame(
         title_list,
         content_list,
         content_writer_list,
