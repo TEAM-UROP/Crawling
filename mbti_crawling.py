@@ -22,8 +22,8 @@ def get_args_parser():
         type=str,
         help="your naver password",
     )
-    parser.add_argument("--start_page", default=1, type=int, help="start page number")
-    parser.add_argument("--end_page", default=30, type=int, help="end page number")
+    parser.add_argument("--start_page", default=31, type=int, help="start page number")
+    parser.add_argument("--end_page", default=60, type=int, help="end page number")
     parser.add_argument(
         "--post_dir", default="./data/raw_post", type=str, help="post directory"
     )
