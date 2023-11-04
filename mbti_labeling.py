@@ -130,15 +130,14 @@ class CommentsToMbti:
 if __name__ == "__main__":
     csv_file_path_post_list = glob.glob("./data/post/*.csv")
     csv_file_path_comment_list = glob.glob("./data/comment/*.csv")
-    special_char_post = "./data/special_char.json"
-    special_char_comment = "./data/special_char.json"
+    special_char = "./data/special_char.json"
 
     for i in range(len(csv_file_path_post_list)):
         postfile = csv_file_path_post_list[i]
-        converter_post = PostToMbti(postfile, special_char_post)
+        converter_post = PostToMbti(postfile, special_char)
         converter_post.process_data()
 
     for j in range(len(csv_file_path_comment_list)):
         comments_file = csv_file_path_comment_list[j]
-        converter_comment = CommentsToMbti(comments_file, special_char_comment)
+        converter_comment = CommentsToMbti(comments_file, special_char)
         converter_comment.process_data()
