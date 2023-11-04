@@ -130,7 +130,7 @@ class CommentsToMbti:
 if __name__ == "__main__":
     csv_file_path_post_list = glob.glob("./data/post/*.csv")
     csv_file_path_comment_list = glob.glob("./data/comment/*.csv")
-    special_char = "./data/special_char.json"
+    special_char = "special_char.json"
 
     for i in range(len(csv_file_path_post_list)):
         postfile = csv_file_path_post_list[i]
