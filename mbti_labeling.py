@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import json
 from datetime import datetime
-
+import os
 
 class PostToMbti:
     def __init__(self, csv_file_path, special_char):
@@ -60,6 +60,9 @@ class PostToMbti:
         post_df = pd.concat([text_df, contents_copy], axis=0)
 
         # csv 파일 저장
+        labeled_post_directory = "./data/labeled_post"
+        if not os.path.exists(labeled_post_directory):
+            os.makedirs(labeled_post_directory)
         time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         file_name = f"./data/labeled_post/labeled_post_{time}.csv"
         post_df.to_csv(file_name, index=False, encoding="utf-8-sig")
@@ -128,8 +131,8 @@ class CommentsToMbti:
 
 
 if __name__ == "__main__":
-    csv_file_path_post_list = glob.glob("./data/post/*.csv")
-    csv_file_path_comment_list = glob.glob("./data/comment/*.csv")
+    csv_file_path_post_list = glob.glob("./data/raw_post/*.csv")
+    csv_file_path_comment_list = glob.glob("./data/raw_comment/*.csv")
     special_char = "special_char.json"
 
     for i in range(len(csv_file_path_post_list)):
