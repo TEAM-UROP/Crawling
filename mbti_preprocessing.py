@@ -43,8 +43,8 @@ def clean_and_save_data2(input_file_path):
 
 
 if __name__ == "__main__":
-    input_files_comment = glob("./data/raw_comment/*.csv")
-    input_files_post = glob("./data/raw_post/*.csv")
+    input_files_comment = glob("./data/labeled_comment/*.csv")
+    input_files_post = glob("./data/labeled_post/*.csv")
 
     # 결과를 저장할 빈 데이터프레임 생성
     final_result_comment = pd.DataFrame(columns=["mbti", "comments"])
