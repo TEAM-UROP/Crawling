@@ -120,6 +120,9 @@ class CommentsToMbti:
         filtered_df = filtered_df.reindex(columns=new_order)
 
         # csv 파일 저장
+        labeled_post_directory = "./data/labeled_commnet"
+        if not os.path.exists(labeled_post_directory):
+            os.makedirs(labeled_post_directory)
         time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         file_name2 = f"./data/labeled_comment/labeled_comment_{time}.csv"
         filtered_df.to_csv(file_name2, index=False, encoding="utf-8-sig")
