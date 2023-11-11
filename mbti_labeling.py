@@ -120,7 +120,7 @@ class CommentsToMbti:
         filtered_df = filtered_df.reindex(columns=new_order)
 
         # csv 파일 저장
-        labeled_post_directory = "./data/labeled_commnet"
+        labeled_post_directory = "./data/labeled_comment"
         if not os.path.exists(labeled_post_directory):
             os.makedirs(labeled_post_directory)
         time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
