@@ -5,11 +5,12 @@ import json
 from datetime import datetime
 import os
 
+
 class PostToMbti:
     def __init__(self, csv_file_path, special_char):
         self.df = pd.read_csv(csv_file_path)  # 본문 csv_file_path
         with open(special_char, "r", encoding="UTF8") as json_file:
-            self.special_char = json.load(json_file)
+            self.special_char = json.load(json_file)["dict"]
         self.valid_mbti = [
             "ISTJ",
             "ISFJ",
@@ -30,16 +31,21 @@ class PostToMbti:
         ]
 
     def toMbti(self, row):
-        #한글
+        # 한글
         for char in str(row):
+            if char.isalpha() == True:
+                row = row.replace(char, char.upper())
             if char in self.special_char:
-                row.replace(char, self.special_char[char])
+                row = row.replace(char, self.special_char[char])
+
         # 영어 MBTI로 변환 가능한 경우
-        mbti_types = re.findall(r"[A-Z]+", row)
+        mbti_types = re.findall(r"[A-Za-z]+", row)
+
         for i in self.valid_mbti:
-            if i in mbti_types:
-                mbti_types = i
-    
+            if len(mbti_types) > 0:
+                if i in mbti_types[0]:
+                    mbti_types = i
+                    return mbti_types
 
     def process_data(self):
         # 'author' 열을 복사하여 'mbti' 열을 생성
@@ -100,18 +106,20 @@ class CommentsToMbti:
         ]
 
     def toMbti(self, row):
-        
-        #한글
         for char in str(row):
+            if char.isalpha() == True:
+                row = row.replace(char, char.upper())
             if char in self.special_char:
-                row.replace(char, self.special_char[char])
+                row = row.replace(char, self.special_char[char])
+
         # 영어 MBTI로 변환 가능한 경우
-        mbti_types = re.findall(r"[A-Z]+", row)
+        mbti_types = re.findall(r"[A-Za-z]+", row)
+
         for i in self.valid_mbti:
-            if i in mbti_types:
-                mbti_types = i
-    
-        
+            if len(mbti_types) > 0:
+                if i in mbti_types[0]:
+                    mbti_types = i
+                    return mbti_types
 
     def process_data(self):
         self.df["mbti"] = self.df["comments_writer"].apply(self.toMbti)
