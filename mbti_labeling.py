@@ -47,7 +47,7 @@ class PostToMbti:
                     mbti_types = i
                     return mbti_types
 
-    def process_data(self):
+    def process_data(self, i):
         # 'author' 열을 복사하여 'mbti' 열을 생성
         self.df["mbti"] = self.df["author"].apply(self.toMbti)
 
@@ -71,8 +71,8 @@ class PostToMbti:
         labeled_post_directory = "./data/labeled_post"
         if not os.path.exists(labeled_post_directory):
             os.makedirs(labeled_post_directory)
-        time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = f"./data/labeled_post/labeled_post_{time}.csv"
+        # time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = f"./data/labeled_post/labeled_post_{i}.csv"
         post_df.to_csv(file_name, index=False, encoding="utf-8-sig")
 
         # 결과 데이터프레임 출력
@@ -121,7 +121,7 @@ class CommentsToMbti:
                     mbti_types = i
                     return mbti_types
 
-    def process_data(self):
+    def process_data(self, i):
         self.df["mbti"] = self.df["comments_writer"].apply(self.toMbti)
         filtered_df = self.df[self.df["mbti"].isin(self.valid_mbti)].drop(
             "comments_writer", axis=1
@@ -135,8 +135,8 @@ class CommentsToMbti:
         labeled_post_directory = "./data/labeled_comment"
         if not os.path.exists(labeled_post_directory):
             os.makedirs(labeled_post_directory)
-        time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name2 = f"./data/labeled_comment/labeled_comment_{time}.csv"
+        # time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        file_name2 = f"./data/labeled_comment/labeled_comment_{i}.csv"
         filtered_df.to_csv(file_name2, index=False, encoding="utf-8-sig")
 
         # 결과 출력
@@ -153,9 +153,9 @@ if __name__ == "__main__":
     for i in range(len(csv_file_path_post_list)):
         postfile = csv_file_path_post_list[i]
         converter_post = PostToMbti(postfile, special_char)
-        converter_post.process_data()
+        converter_post.process_data(i)
 
     for j in range(len(csv_file_path_comment_list)):
         comments_file = csv_file_path_comment_list[j]
         converter_comment = CommentsToMbti(comments_file, special_char)
-        converter_comment.process_data()
+        converter_comment.process_data(j)
