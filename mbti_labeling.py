@@ -30,14 +30,16 @@ class PostToMbti:
         ]
 
     def toMbti(self, row):
-        mbti_types = re.findall(r"[A-Z]+", row)
-        if mbti_types:
-            return mbti_types[0]
-        converted_string = ""
-        for char in row:
+        #한글
+        for char in str(row):
             if char in self.special_char:
-                converted_string += self.special_char[char]
-        return converted_string
+                row.replace(char, self.special_char[char])
+        # 영어 MBTI로 변환 가능한 경우
+        mbti_types = re.findall(r"[A-Z]+", row)
+        for i in self.valid_mbti:
+            if i in mbti_types:
+                mbti_types = i
+    
 
     def process_data(self):
         # 'author' 열을 복사하여 'mbti' 열을 생성
@@ -98,16 +100,18 @@ class CommentsToMbti:
         ]
 
     def toMbti(self, row):
+        
+        #한글
+        for char in str(row):
+            if char in self.special_char:
+                row.replace(char, self.special_char[char])
         # 영어 MBTI로 변환 가능한 경우
         mbti_types = re.findall(r"[A-Z]+", row)
-        if mbti_types:
-            return mbti_types[0]
-        # 한글 MBTI로 변환
-        converted_string = ""
-        for char in row:
-            if char in self.special_char:
-                converted_string += self.special_char[char]
-        return converted_string
+        for i in self.valid_mbti:
+            if i in mbti_types:
+                mbti_types = i
+    
+        
 
     def process_data(self):
         self.df["mbti"] = self.df["comments_writer"].apply(self.toMbti)
