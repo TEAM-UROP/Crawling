@@ -64,6 +64,6 @@ if __name__ == "__main__":
 
     comments_name = f"./data/pre_comment/pre_comment_{time}.csv"
     post_name = f"./data/pre_post/pre_post_{time}.csv"
-
+    
     final_result_comment.to_csv(comments_name, index=False, encoding="utf-8")
     final_result_post.to_csv(post_name, index=False, encoding="utf-8")
