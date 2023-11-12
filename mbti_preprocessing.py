@@ -6,7 +6,7 @@ from glob import glob
 
 def remove_punctuation(input_string):
     # 문자열에서 기호를 제거하는 정규 표현식 패턴
-    pattern = r"[^\uAC00-\uD7A30-9a-zA-Z\s]"
+    pattern = r"[^\uAC00-\uD7A30-9a-zA-Z\s]|https?://\S+|(\w)\1+"
     # 정규 표현식 패턴을 사용하여 기호를 공백으로 대체
     try:
         result = re.sub(pattern, "", input_string)
