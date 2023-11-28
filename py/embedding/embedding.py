@@ -1,4 +1,3 @@
-import pandas as pd
 from gensim.models import Word2Vec
 import optuna
 from sklearn.model_selection import train_test_split
@@ -9,11 +8,11 @@ class Embedding:
         self.args = args
         self.corpus = tokenized_sentences
         self.trn, self.tst, self.val = self.get_split_data()
-        self.get_embedding_vector()
+        # self.get_embedding_vector()
 
     # TODO: corpus를 train, test, validation으로 split 하여 임베딩 진행 or 임베딩 진행 후 split -> 나중에 argparser로 선택할 수 있도록 구현
-    def get_split_data(self, option):
-        if option == 0:
+    def get_split_data(self):
+        if self.args.sp_option == 0:
             # 옵션 0: 나누지 않고 전체 코퍼스를 훈련에 사용
             train_corpus = self.corpus
             test_corpus = None
