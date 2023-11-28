@@ -3,15 +3,13 @@ from gensim.models import Word2Vec
 import optuna
 from sklearn.model_selection import train_test_split
 
+
 class Embedding:
-    def __init__(self, corpus):
-        self.df = pd.read_csv(corpus)
-        # 텍스트를 토큰화하여 리스트로 변환
-        self.corpus = [
-            str(sentence).lower().split()
-            for sentence in self.df["comments"]
-            if pd.notnull(sentence)
-        ]
+    def __init__(self, args, tokenized_sentences):
+        self.args = args
+        self.corpus = tokenized_sentences
+        self.trn, self.tst, self.val = self.get_split_data()
+        self.get_embedding_vector()
 
     # TODO: corpus를 train, test, validation으로 split 하여 임베딩 진행 or 임베딩 진행 후 split -> 나중에 argparser로 선택할 수 있도록 구현
     def get_split_data(self, option):
@@ -22,8 +20,12 @@ class Embedding:
             validation_corpus = None
         else:
             # 옵션 1: 코퍼스를 훈련, 테스트, 검증 세트로 나눔
-            train_corpus, temp_corpus = train_test_split(self.corpus, test_size=0.5, random_state=42)
-            test_corpus, validation_corpus = train_test_split(temp_corpus, test_size=0.4, random_state=42)
+            train_corpus, temp_corpus = train_test_split(
+                self.corpus, test_size=0.5, random_state=42
+            )
+            test_corpus, validation_corpus = train_test_split(
+                temp_corpus, test_size=0.4, random_state=42
+            )
         return train_corpus, test_corpus, validation_corpus
 
     def objective(self, trial):
@@ -63,21 +65,24 @@ class Embedding:
             min_count=best_params["min_count"],
             sg=best_params["sg"],
         )
-        best_model.build_vocab(self.corpus)
-        best_model.train(
-            self.corpus,
-            total_examples=best_model.corpus_count,
-            epochs=best_model.epochs,
-        )
-        # 튜닝된 Word2Vec 모델에서 단어 벡터 출력
-        word_vectors = best_model.wv
+        vectors = []
+        for i in [self.trn, self.tst, self.val]:
+            if i is not None:
+                best_model.build_vocab(i, update=True)
+                best_model.train(
+                    self.corpus,
+                    total_examples=best_model.corpus_count,
+                    epochs=best_model.epochs,
+                )
+                word_vectors = best_model.wv
+                vectors.append(word_vectors)
         print("형태: ", word_vectors.vectors.shape)
-        return word_vectors
+        return vectors
 
 
 if __name__ == "__main__":
     # 임베딩 옵션 설정
-    
+
     embedding_option = 1
     embedding = Embedding("../tokenized_0.csv")
     train_data, test_data, validation_data = embedding.get_split_data(embedding_option)
