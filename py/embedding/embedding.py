@@ -20,7 +20,7 @@ class Embedding:
         else:
             # 옵션 1: 코퍼스를 훈련, 테스트, 검증 세트로 나눔
             train_corpus, temp_corpus = train_test_split(
-                self.corpus, test_size=0.5, random_state=42
+                self.corpus, test_size=0.1, random_state=42
             )
             test_corpus, validation_corpus = train_test_split(
                 temp_corpus, test_size=0.4, random_state=42
@@ -67,7 +67,7 @@ class Embedding:
         vectors = []
         for i in [self.trn, self.tst, self.val]:
             if i is not None:
-                best_model.build_vocab(i, update=True)
+                best_model.build_vocab(i, update=False)
                 best_model.train(
                     self.corpus,
                     total_examples=best_model.corpus_count,
@@ -75,14 +75,24 @@ class Embedding:
                 )
                 word_vectors = best_model.wv
                 vectors.append(word_vectors)
-        print("형태: ", word_vectors.vectors.shape)
-        return vectors
+        print("형태 : ", word_vectors.vectors.shape)
+        print("데이터 : ", i)
+        
+        # 3개의 벡터를 return
+        train_corpus, temp_corpus = train_test_split(
+                self.corpus, test_size=0.5, random_state=42
+            )
+        test_corpus, validation_corpus = train_test_split(
+                temp_corpus, test_size=0.5, random_state=42
+            )
+        return train_corpus, test_corpus, validation_corpus
 
 
 if __name__ == "__main__":
     # 임베딩 옵션 설정
 
-    embedding_option = 1
+    embedding_option = 0
     embedding = Embedding("../tokenized_0.csv")
     train_data, test_data, validation_data = embedding.get_split_data(embedding_option)
     word_vectors = embedding.get_embedding_vector()
+    # train, test, validation split에서 문제점이 있음 디버깅 필요
