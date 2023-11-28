@@ -7,7 +7,7 @@ import torch.optim as optim
 from embedding import Embedding
 from collections import Counter
 from torch.utils.data import DataLoader
-
+from torch.utils.data import Dataset
 
 class MyLSTM(nn.Module):
     def __init__(self, input_dim, hidden_dim, vocab_size, n_classes=10):
@@ -28,12 +28,27 @@ class MyLSTM(nn.Module):
         out = self.fc(out)
         return out
 
+class MyDataset(Dataset):
+    def __init__(self, data, labels):
+        self.data = data
+        self.labels = labels
+        
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        data_sample = self.data[idx]
+        label = self.labels[idx]
+        return data_sample, label
 
 class TextModel:
     def __init__(self):
         self.model = None
         self.optimizer = None
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.trn_loader = None
+        self.tst_loader = None
+        self.val_loader = None
 
     def get_word_dict(self, corpus):
         df = pd.read_csv(corpus)
@@ -55,7 +70,18 @@ class TextModel:
         }
         vocab_size = len(word_to_index)
         return vocab_size
+    
+    def data_loader(self):
+        train_dataset = MyDataset(word_vectors[0])
+        valid_dataset = MyDataset(word_vectors[1])
+        test_dataset = MyDataset(word_vectors[2])
 
+        
+        self.trn_loader = DataLoader(train_dataset, batch_size=50, shuffle= True, drop_last=False)
+        self.val_loader = DataLoader(valid_dataset, batch_size = 50, shuffle= False)
+        self.tst_loader = DataLoader(test_dataset, batch_size=50, shuffle= False)
+        
+        
     def train(self, model, data_loader, optimizer, criterion, device):
         model.train()  # 모델을 학습모드로!
         trn_loss = 0
@@ -79,13 +105,13 @@ class TextModel:
         avg_trn_loss = trn_loss / len(data_loader.dataset)
         return avg_trn_loss
 
-    def evaluate(self, model, data_loader, optimizer, criterion, device):
+    def evaluate(self, model, optimizer, criterion, device):
         model.eval()  # 모델을 평가모드로!
         eval_loss = 0
         results_pred = []
         results_real = []
         with torch.no_grad():  # evaluate()함수에는 단순 forward propagation만 할 뿐, gradient 계산 필요 X.
-            for i, (label, text) in enumerate(data_loader):
+            for i, (label, text) in enumerate(self.tst_loader):
                 # Step 1. mini-batch에서 x,y 데이터를 얻고, 원하는 device에 위치시키기
                 x = torch.LongTensor(text).to(device)
                 y = torch.LongTensor(label).to(device)
@@ -101,7 +127,7 @@ class TextModel:
                 # Step 6. eval_loss변수에 mini-batch loss를 누적해서 합산
                 eval_loss += loss.item()
         # Step 7. 데이터 한 개당 평균 eval_loss와 accuracy구하기
-        avg_eval_loss = eval_loss / len(data_loader.dataset)
+        avg_eval_loss = eval_loss / len(self.tst_loader.dataset)
         results_pred = np.array(results_pred)
         results_real = np.array(results_real)
         accuracy = np.sum(results_pred == results_real) / len(results_real)
@@ -117,12 +143,9 @@ class TextModel:
         self,
         word_vectors,
         csv,
-        trn_loader,
-        val_loader,
         N_EPOCHS=10,
         LR=0.001,
-        BATCH_SIZE=64,
-    ):
+        ):
         # 데이터셋 크기와 임베딩 차원 파악
         _, embedding_dim = word_vectors.shape
         # vocab = set(word for sentence in tokenized_corpus for word in sentence)
@@ -139,14 +162,14 @@ class TextModel:
             start_time = time.time()
             trn_loss = self.train(
                 model=model,
-                data_loader=trn_loader,
+                data_loader=self.trn_loader,
                 criterion=loss_func,
                 optimizer=optimizer,
                 device=self.device,
             )
             val_loss, accuracy = self.evaluate(
                 model=model,
-                data_loader=val_loader,
+                data_loader=self.val_loader,
                 criterion=loss_func,
                 optimizer=optimizer,
                 device=self.device,
