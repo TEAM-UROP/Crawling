@@ -1,7 +1,7 @@
 import pandas as pd
 from gensim.models import Word2Vec
 import optuna
-
+from sklearn.model_selection import train_test_split
 
 class Embedding:
     def __init__(self, corpus):
@@ -14,8 +14,17 @@ class Embedding:
         ]
 
     # TODO: corpus를 train, test, validation으로 split 하여 임베딩 진행 or 임베딩 진행 후 split -> 나중에 argparser로 선택할 수 있도록 구현
-    def get_split_data(self):
-        pass
+    def get_split_data(self, option):
+        if option == 0:
+            # 옵션 0: 나누지 않고 전체 코퍼스를 훈련에 사용
+            train_corpus = self.corpus
+            test_corpus = None
+            validation_corpus = None
+        else:
+            # 옵션 1: 코퍼스를 훈련, 테스트, 검증 세트로 나눔
+            train_corpus, temp_corpus = train_test_split(self.corpus, test_size=0.5, random_state=42)
+            test_corpus, validation_corpus = train_test_split(temp_corpus, test_size=0.4, random_state=42)
+        return train_corpus, test_corpus, validation_corpus
 
     def objective(self, trial):
         # 하이퍼파라미터 탐색할 범위 지정
@@ -67,5 +76,9 @@ class Embedding:
 
 
 if __name__ == "__main__":
-    embedding = Embedding("./tokenized_0.csv")
+    # 임베딩 옵션 설정
+    
+    embedding_option = 1
+    embedding = Embedding("../tokenized_0.csv")
+    train_data, test_data, validation_data = embedding.get_split_data(embedding_option)
     word_vectors = embedding.get_embedding_vector()
