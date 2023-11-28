@@ -13,9 +13,13 @@ class Embedding:
             if pd.notnull(sentence)
         ]
 
+    # TODO: corpus를 train, test, validation으로 split 하여 임베딩 진행 or 임베딩 진행 후 split -> 나중에 argparser로 선택할 수 있도록 구현
+    def get_split_data(self):
+        pass
+
     def objective(self, trial):
         # 하이퍼파라미터 탐색할 범위 지정
-        vector_size = trial.suggest_int("vector_size", 10, 300)
+        vector_size = trial.suggest_int("vector_size", 10, 100)
         window = trial.suggest_int("window", 3, 10)
         min_count = trial.suggest_int("min_count", 5, 30)
         sg = trial.suggest_categorical("sg", [0])
