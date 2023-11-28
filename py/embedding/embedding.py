@@ -96,3 +96,4 @@ if __name__ == "__main__":
     train_data, test_data, validation_data = embedding.get_split_data(embedding_option)
     word_vectors = embedding.get_embedding_vector()
     # train, test, validation split에서 문제점이 있음 디버깅 필요
+    # 전체를 대상으로 하이퍼 파라미터를 튜닝 한 뒤, TRAIN, TEST, VALIDATION에 대해서 하이퍼 파라미터 학습시켜서 임베딩 벡터를 각각 만들어냄.
