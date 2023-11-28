@@ -67,7 +67,7 @@ class Embedding:
         vectors = []
         for i in [self.trn, self.tst, self.val]:
             if i is not None:
-                best_model.build_vocab(i, update=True)
+                best_model.build_vocab(i)
                 best_model.train(
                     self.corpus,
                     total_examples=best_model.corpus_count,
