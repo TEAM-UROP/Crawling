@@ -160,7 +160,7 @@ class TextModel:
         VOCAB_SIZE = self.get_word_dict(self.data)
         # 모델 인스턴스 생성
         model = MyLSTM(
-            input_dim=embedding_dim, hidden_dim=50, vocab_size=VOCAB_SIZE, n_classes=10
+            input_dim=embedding_dim, hidden_dim=512, vocab_size=VOCAB_SIZE, n_classes=2
         )
         model = model.to(self.device)
         optimizer = optim.Adam(model.parameters(), lr=LR)
