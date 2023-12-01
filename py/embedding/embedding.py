@@ -61,5 +61,3 @@ class Embedding:
 if __name__ == "__main__":
     embedding = Embedding("./tokenized_0.csv")
     word2vec_model = embedding.get_embedding_model()
-
-    # 이후에 word2vec_model을 사용하여 LSTM 또는 다른 모델을 훈련하고 평가할 수 있습니다.
