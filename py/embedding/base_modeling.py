@@ -9,6 +9,7 @@ from collections import Counter
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
+
 class MyLSTM(nn.Module):
     def __init__(self, input_dim, hidden_dim, vocab_size, n_classes=10):
         super(MyLSTM, self).__init__()
@@ -28,11 +29,12 @@ class MyLSTM(nn.Module):
         out = self.fc(out)
         return out
 
+
 class MyDataset(Dataset):
     def __init__(self, data, labels):
         self.data = data
         self.labels = labels
-        
+
     def __len__(self):
         return len(self.data)
 
@@ -41,21 +43,25 @@ class MyDataset(Dataset):
         label = self.labels[idx]
         return data_sample, label
 
+
 class TextModel:
-    def __init__(self):
+    def __init__(self, args, vectors):
+        self.vectors = vectors
+        self.args = args
         self.model = None
         self.optimizer = None
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.trn_loader = None
         self.tst_loader = None
         self.val_loader = None
+        self.data = self.args.data
 
-    def get_word_dict(self, corpus):
-        df = pd.read_csv(corpus)
+    def get_word_dict(self):
+        df = pd.read_csv(self.data)
         # 텍스트를 토큰화하여 리스트로 변환
         corpus = [
             str(sentence).lower().split()
-            for sentence in self.df["comments"]
+            for sentence in df["comments"]
             if pd.notnull(sentence)
         ]
         word_counts = Counter()
@@ -70,64 +76,49 @@ class TextModel:
         }
         vocab_size = len(word_to_index)
         return vocab_size
-    
-    def data_loader(self):
-        train_dataset = MyDataset(word_vectors[0])
-        valid_dataset = MyDataset(word_vectors[1])
-        test_dataset = MyDataset(word_vectors[2])
 
-        
-        self.trn_loader = DataLoader(train_dataset, batch_size=50, shuffle= True, drop_last=False)
-        self.val_loader = DataLoader(valid_dataset, batch_size = 50, shuffle= False)
-        self.tst_loader = DataLoader(test_dataset, batch_size=50, shuffle= False)
-        
-        
-    def train(self, model, data_loader, optimizer, criterion, device):
-        model.train()  # 모델을 학습모드로!
+    def data_loader(self):
+        train_dataset = MyDataset(self.vectors[0])
+        valid_dataset = MyDataset(self.vectors[1])
+        test_dataset = MyDataset(self.vectors[2])
+
+        self.trn_loader = DataLoader(
+            train_dataset, batch_size=50, shuffle=True, drop_last=False
+        )
+        self.val_loader = DataLoader(valid_dataset, batch_size=50, shuffle=False)
+        self.tst_loader = DataLoader(test_dataset, batch_size=50, shuffle=False)
+
+    def train(self, model, optimizer, criterion):
+        model.train()
         trn_loss = 0
-        for i, (label, text) in enumerate(data_loader):
-            # Step 1. mini-batch에서 x,y 데이터를 얻고, 원하는 device에 위치시키기
-            x = torch.LongTensor(text).to(device)
-            y = torch.LongTensor(label).to(device)
-            # Step 2. gradient 초기화
+        for label, text in self.trn_loader:
+            x = torch.LongTensor(text).to(self.device)
+            y = torch.LongTensor(label).to(self.device)
             optimizer.zero_grad()
-            # Step 3. Forward Propagation
             y_pred_prob = model(x)
-            # Step 4. Loss Calculation
             loss = criterion(y_pred_prob, y)
-            # Step 5. Gradient Calculation (Backpropagation)
             loss.backward()
-            # Step 6. Update Parameter (by Gradient Descent)
             optimizer.step()
-            # Step 7. trn_loss 변수에 mini-batch loss를 누적해서 합산
             trn_loss += loss.item()
-        # Step 8. 데이터 한 개당 평균 train loss
-        avg_trn_loss = trn_loss / len(data_loader.dataset)
+        avg_trn_loss = trn_loss / len(self.trn_loader.dataset)
         return avg_trn_loss
 
-    def evaluate(self, model, optimizer, criterion, device):
+    def evaluate(self, model, criterion):
         model.eval()  # 모델을 평가모드로!
         eval_loss = 0
         results_pred = []
         results_real = []
-        with torch.no_grad():  # evaluate()함수에는 단순 forward propagation만 할 뿐, gradient 계산 필요 X.
-            for i, (label, text) in enumerate(self.tst_loader):
-                # Step 1. mini-batch에서 x,y 데이터를 얻고, 원하는 device에 위치시키기
-                x = torch.LongTensor(text).to(device)
-                y = torch.LongTensor(label).to(device)
-                # Step 2. Forward Propagation
+        with torch.no_grad():
+            for label, text in self.tst_loader:
+                x = torch.LongTensor(text).to(self.device)
+                y = torch.LongTensor(label).to(self.device)
                 y_pred_prob = model(x)
-                # Step 3. Loss Calculation
                 loss = criterion(y_pred_prob, y)
-                # Step 4. Predict label
                 y_pred_label = torch.argmax(y_pred_prob, dim=1)
-                # Step 5. Save real and predicted label
                 results_pred.extend(y_pred_label.detach().cpu().numpy())
                 results_real.extend(y.detach().cpu().numpy())
-                # Step 6. eval_loss변수에 mini-batch loss를 누적해서 합산
                 eval_loss += loss.item()
-        # Step 7. 데이터 한 개당 평균 eval_loss와 accuracy구하기
-        avg_eval_loss = eval_loss / len(self.tst_loader.dataset)
+        avg_eval_loss = eval_loss / len(self.val_loader.dataset)
         results_pred = np.array(results_pred)
         results_real = np.array(results_real)
         accuracy = np.sum(results_pred == results_real) / len(results_real)
@@ -141,15 +132,11 @@ class TextModel:
 
     def train_model(
         self,
-        word_vectors,
-        csv,
         N_EPOCHS=10,
         LR=0.001,
-        ):
-        # 데이터셋 크기와 임베딩 차원 파악
-        _, embedding_dim = word_vectors.shape
-        # vocab = set(word for sentence in tokenized_corpus for word in sentence)
-        VOCAB_SIZE = self.get_word_dict(csv)
+    ):
+        _, embedding_dim = self.vectors[0].shape
+        VOCAB_SIZE = self.get_word_dict(self.data)
         # 모델 인스턴스 생성
         model = MyLSTM(
             input_dim=embedding_dim, hidden_dim=50, vocab_size=VOCAB_SIZE, n_classes=10
@@ -162,17 +149,12 @@ class TextModel:
             start_time = time.time()
             trn_loss = self.train(
                 model=model,
-                data_loader=self.trn_loader,
                 criterion=loss_func,
                 optimizer=optimizer,
-                device=self.device,
             )
             val_loss, accuracy = self.evaluate(
                 model=model,
-                data_loader=self.val_loader,
                 criterion=loss_func,
-                optimizer=optimizer,
-                device=self.device,
             )
             end_time = time.time()
             epoch_mins, epoch_secs = self.epoch_time(start_time, end_time)
