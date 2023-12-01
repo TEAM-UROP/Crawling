@@ -9,7 +9,7 @@ from embedding import Embedding
 from collections import Counter
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
-
+from sklearn.model_selection import train_test_split
 
 class MyLSTM(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, vocab_size, n_classes=2, num_layers=2, dropout=0.2):
@@ -66,8 +66,8 @@ class MyDataset(Dataset):
 
 
 class TextModel:
-    def __init__(self, args, vectors):
-        self.vectors = vectors
+    def __init__(self, args, word2vec_model):
+        self.word2vec_model = word2vec_model
         self.args = args
         self.model = None
         self.optimizer = None
@@ -76,6 +76,16 @@ class TextModel:
         self.tst_loader = None
         self.val_loader = None
         self.data = self.args.data
+
+    def prepare_data(self, data):
+        
+        X = self.data["comments"]
+        y = self.data["mbti"]  
+
+        X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=self.args.seed)
+        X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=self.args.seed)
+
+        return X_train, X_val, X_test, y_train, y_val, y_test
 
     def get_word_dict(self):
         df = pd.read_csv(self.data)
@@ -97,11 +107,37 @@ class TextModel:
         }
         vocab_size = len(word_to_index)
         return vocab_size
+    
+    def get_word_vectors(self, sentences):
+        word_vectors = []
+        for sentence in sentences:
+            # word2vec_model을 활용하여 문장을 벡터화하여 word_vectors에 추가
+            vectorized_sentence = [self.word2vec_model.wv[word] for word in sentence if word in self.word2vec_model.wv]
+            word_vectors.append(vectorized_sentence)
+        return word_vectors
+    
+    def vectorize_data(self, X_train, X_val, X_test):
+        # 데이터를 word vectors로 변환
+        train_word_vectors = self.get_word_vectors(X_train)
+        val_word_vectors = self.get_word_vectors(X_val)
+        test_word_vectors = self.get_word_vectors(X_test)
+
+        return train_word_vectors, val_word_vectors, test_word_vectors
+    
+    def train_model(self, word2vec_model):
+        # 데이터 불러오기
+        df = pd.read_csv(self.args.data)
+
+        # 데이터 준비
+        X_train, X_val, X_test, y_train, y_val, y_test = self.prepare_data(df)
+
+        # 데이터를 word vectors로 변환
+        train_word_vectors, val_word_vectors, test_word_vectors = self.vectorize_data(X_train, X_val, X_test)
 
     def data_loader(self):
-        train_dataset = MyDataset(self.vectors[0])
-        valid_dataset = MyDataset(self.vectors[1])
-        test_dataset = MyDataset(self.vectors[2])
+        train_dataset = MyDataset(self.train_word_vectors)
+        valid_dataset = MyDataset(self.val_word_vectors)
+        test_dataset = MyDataset(self.test_word_vectors)
 
         self.trn_loader = DataLoader(
             train_dataset, batch_size=50, shuffle=True, drop_last=False
