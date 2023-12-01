@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import time
 import torch.optim as optim
 from embedding import Embedding
@@ -11,21 +12,41 @@ from torch.utils.data import Dataset
 
 
 class MyLSTM(nn.Module):
-    def __init__(self, input_dim, hidden_dim, vocab_size, n_classes=10):
+    def __init__(self, input_dim, hidden_dim, output_dim, vocab_size, n_classes=2, num_layers=2, dropout=0.2):
         super(MyLSTM, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
         self.n_classes = n_classes
+        self.num_layers = num_layers
+        self.dropout = dropout
         self.lstm = nn.LSTM(
-            input_size=self.input_dim, hidden_size=self.hidden_dim, batch_first=True
+            input_size=self.input_dim, hidden_size=self.hidden_dim, 
+            num_layers= num_layers, bias=True, batch_first=True, dropout=dropout
         )
         self.fc = nn.Linear(in_features=self.hidden_dim, out_features=self.n_classes)
         self.embedding = nn.Embedding(vocab_size, input_dim)
+        self.fc1 = nn.Linear(in_features=self.hidden_dim, out_features=256)
+        self.fc2 = nn.Linear(in_features=256, out_features=128)
+        self.fc3 = nn.Linear(in_features=128, out_features=64)
+        self.fc4 = nn.Linear(in_features=64, out_features=self.output_dim)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         embedded = self.embedding(x)
         out, _ = self.lstm(embedded)
         out = out[:, -1, :]
+        
+        # Pass through additional layers with dropout
+        out = F.relu(self.fc1(out))
+        out = self.dropout(out)
+        out = F.relu(self.fc2(out))
+        out = self.dropout(out)
+        out = F.relu(self.fc3(out))
+        out = self.dropout(out)
+        out = F.relu(self.fc4(out))
+        out = self.dropout(out)
+        
         out = self.fc(out)
         return out
 
