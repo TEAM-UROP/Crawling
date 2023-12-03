@@ -13,10 +13,10 @@ class Tokenizer:
 
     def tokenizing(self):
         self.data["comments"] = self.data["comments"].astype(str)
-
+        mbti = self.data[['mbti']]
         # tok_okt_morphs = self.data["comments"].apply(
         #     lambda row: " ".join(self.okt.morphs(row))
-        # )
+        #  )
 
         # tok_okt_pos = self.data["comments"].apply(
         #     lambda row: " ".join(
@@ -67,8 +67,11 @@ class Tokenizer:
             # tok_hannaum_pos,
             # tok_hannaum_nouns,
         )
-
-        return res
+        for i in range(len(res)):
+            new_res = pd.DataFrame(res[i])
+            new_res = new_res.swapaxes(axis1= 0, axis2=1)
+            real_res = pd.concat([new_res,mbti],axis=1)
+            return real_res
 
 
 if __name__ == "__main__":
