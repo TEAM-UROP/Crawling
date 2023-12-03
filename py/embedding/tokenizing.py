@@ -14,9 +14,9 @@ class Tokenizer:
     def tokenizing(self):
         self.data["comments"] = self.data["comments"].astype(str)
 
-        tok_okt_morphs = self.data["comments"].apply(
-            lambda row: " ".join(self.okt.morphs(row))
-        )
+        # tok_okt_morphs = self.data["comments"].apply(
+        #     lambda row: " ".join(self.okt.morphs(row))
+        # )
 
         # tok_okt_pos = self.data["comments"].apply(
         #     lambda row: " ".join(
@@ -28,9 +28,9 @@ class Tokenizer:
             lambda row: " ".join(self.okt.nouns(row))
         )
 
-        tok_kkma_morphs = self.data["comments"].apply(
-            lambda row: " ".join(self.kkma.morphs(row))
-        )
+        # tok_kkma_morphs = self.data["comments"].apply(
+        #     lambda row: " ".join(self.kkma.morphs(row))
+        # )
 
         # tok_kkma_pos = self.data["comments"].apply(
         #     lambda row: " ".join(
@@ -38,13 +38,13 @@ class Tokenizer:
         #     )
         # )
 
-        tok_kkma_nouns = self.data["comments"].apply(
-            lambda row: " ".join(self.kkma.nouns(row))
-        )
+        # tok_kkma_nouns = self.data["comments"].apply(
+        #     lambda row: " ".join(self.kkma.nouns(row))
+        # )
 
-        tok_hannaum_morphs = self.data["comments"].apply(
-            lambda row: " ".join(self.hannanum.morphs(row))
-        )
+        # tok_hannaum_morphs = self.data["comments"].apply(
+        #     lambda row: " ".join(self.hannanum.morphs(row))
+        # )
 
         # tok_hannaum_pos = self.data["comments"].apply(
         #     lambda row: " ".join(
@@ -52,20 +52,20 @@ class Tokenizer:
         #     )
         # )
 
-        tok_hannaum_nouns = self.data["comments"].apply(
-            lambda row: " ".join(self.hannanum.morphs(row))
-        )
+        # tok_hannaum_nouns = self.data["comments"].apply(
+        #     lambda row: " ".join(self.hannanum.morphs(row))
+        # )
 
         res = (
-            tok_okt_morphs,
+            # tok_okt_morphs,
             # tok_okt_pos,
             tok_okt_nouns,
-            tok_kkma_morphs,
+            # tok_kkma_morphs,
             # tok_kkma_pos,
-            tok_kkma_nouns,
-            tok_hannaum_morphs,
+            # tok_kkma_nouns,
+            # tok_hannaum_morphs,
             # tok_hannaum_pos,
-            tok_hannaum_nouns,
+            # tok_hannaum_nouns,
         )
 
         return res
