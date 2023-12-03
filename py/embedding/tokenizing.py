@@ -67,12 +67,13 @@ class Tokenizer:
             # tok_hannaum_pos,
             # tok_hannaum_nouns,
         )
+        aba = []
         for i in range(len(res)):
             new_res = pd.DataFrame(res[i])
-            new_res = new_res.swapaxes(axis1= 0, axis2=1)
+            # new_res=new_res.transpose()
             real_res = pd.concat([new_res,mbti],axis=1)
-            real_res = real_res.dropna()
-            return real_res
+            aba.append(real_res)
+            return aba
 
 
 if __name__ == "__main__":
