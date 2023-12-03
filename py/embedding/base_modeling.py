@@ -69,7 +69,8 @@ class MyLSTM(nn.Module):
 class MyDataset(Dataset):
     def __init__(self, data, labels):
         self.data = data
-        self.labels = labels
+        self.labels = labels.reset_index(drop=True)
+        # print(self.labels)
 
     def __len__(self):
         return len(self.data)
@@ -123,12 +124,13 @@ class TextModel:
         return vocab_size
 
     def prepare_data(self):
-        for i in range(6):
-            file = f"./tokenized_{i}.csv"
-            if os.path.isfile(file):
-                data = pd.read_csv(file)
-                X = data["comments"]
-                y = data["mbti"]
+        file = f"C:/Users/user/OneDrive/문서/dev/UROP/Crawling/tokenized_0.csv"
+        if os.path.isfile(file):
+            data = pd.read_csv(file)
+            # print(data)
+            X = data["comments"]
+
+        y = pd.read_csv(self.data)["mbti"]
 
         self.X_train, X_temp, self.y_train, y_temp = train_test_split(
             X, y, test_size=0.2, random_state=self.args.seed
@@ -138,39 +140,46 @@ class TextModel:
         )
 
     def get_word_vectors(self, sentences):
+        # print(sentences)
         word_vectors = []
         for sentence in sentences:
-            vectorized_sentence = [
-                self.word2vec_model.wv[word]
-                for word in sentence
-                if word in self.word2vec_model.wv
-            ]
+            try:
+                vectorized_sentence = [
+                    self.word2vec_model.wv[word]
+                    for word in sentence
+                    if word in self.word2vec_model.wv
+                ]
+            except:
+                vectorized_sentence = np.zeros((1, self.word2vec_model.wv.vector_size))
             word_vectors.append(vectorized_sentence)
+            # break
         return word_vectors
 
     def vectorize_data(self):
-        # 데이터를 word vectors로 변환
         self.prepare_data()
         self.train_word_vectors = self.get_word_vectors(self.X_train)
         self.val_word_vectors = self.get_word_vectors(self.X_val)
         self.test_word_vectors = self.get_word_vectors(self.X_test)
 
     def data_loader(self):
-        train_dataset = MyDataset(self.train_word_vectors)
-        valid_dataset = MyDataset(self.val_word_vectors)
-        test_dataset = MyDataset(self.test_word_vecstors)
+        train_dataset = MyDataset(self.train_word_vectors, self.y_train)
+        valid_dataset = MyDataset(self.val_word_vectors, self.y_val)
+        test_dataset = MyDataset(self.test_word_vectors, self.y_test)
 
         self.trn_loader = DataLoader(
-            train_dataset, batch_size=50, shuffle=True, drop_last=False
+            train_dataset, batch_size=1, shuffle=True, drop_last=False
         )
-        self.val_loader = DataLoader(valid_dataset, batch_size=50, shuffle=False)
-        self.tst_loader = DataLoader(test_dataset, batch_size=50, shuffle=False)
+        self.val_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False)
+        self.tst_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
     def train(self, model, optimizer, criterion):
         model.train()
         trn_loss = 0
-        for label, text in self.trn_loader:
-            x = torch.LongTensor(text).to(self.device)
+        for text, label in self.trn_loader:
+            x = torch.LongTensor(text).to(
+                0923
+                
+                self.device)
             y = torch.LongTensor(label).to(self.device)
             optimizer.zero_grad()
             y_pred_prob = model(x)
@@ -215,11 +224,15 @@ class TextModel:
     ):
         self.vectorize_data()
         self.data_loader()
-        _, embedding_dim = self.train_word_vectors.shape
-        VOCAB_SIZE = self.get_word_dict(self.data)
+        _, embedding_dim = self.word2vec_model.wv.vectors.shape
+        VOCAB_SIZE = self.get_word_dict()
         # 모델 인스턴스 생성
         model = MyLSTM(
-            input_dim=embedding_dim, hidden_dim=512, vocab_size=VOCAB_SIZE, n_classes=2
+            input_dim=embedding_dim,
+            hidden_dim=512,
+            output_dim=1,
+            vocab_size=VOCAB_SIZE,
+            n_classes=2,
         )
         model = model.to(self.device)
         optimizer = optim.Adam(model.parameters(), lr=LR)
