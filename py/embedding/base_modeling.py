@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import torch
@@ -11,8 +12,18 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 
+
 class MyLSTM(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, vocab_size, n_classes=2, num_layers=2, dropout=0.2):
+    def __init__(
+        self,
+        input_dim,
+        hidden_dim,
+        output_dim,
+        vocab_size,
+        n_classes=2,
+        num_layers=2,
+        dropout=0.2,
+    ):
         super(MyLSTM, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
@@ -21,8 +32,12 @@ class MyLSTM(nn.Module):
         self.num_layers = num_layers
         self.dropout = dropout
         self.lstm = nn.LSTM(
-            input_size=self.input_dim, hidden_size=self.hidden_dim, 
-            num_layers= num_layers, bias=True, batch_first=True, dropout=dropout
+            input_size=self.input_dim,
+            hidden_size=self.hidden_dim,
+            num_layers=num_layers,
+            bias=True,
+            batch_first=True,
+            dropout=dropout,
         )
         self.fc = nn.Linear(in_features=self.hidden_dim, out_features=self.n_classes)
         self.embedding = nn.Embedding(vocab_size, input_dim)
@@ -36,7 +51,7 @@ class MyLSTM(nn.Module):
         embedded = self.embedding(x)
         out, _ = self.lstm(embedded)
         out = out[:, -1, :]
-        
+
         # Pass through additional layers with dropout
         out = F.relu(self.fc1(out))
         out = self.dropout(out)
@@ -46,7 +61,7 @@ class MyLSTM(nn.Module):
         out = self.dropout(out)
         out = F.relu(self.fc4(out))
         out = self.dropout(out)
-        
+
         out = self.fc(out)
         return out
 
@@ -75,17 +90,16 @@ class TextModel:
         self.trn_loader = None
         self.tst_loader = None
         self.val_loader = None
+        self.train_word_vectors = None
+        self.test_word_vectors = None
+        self.val_word_vectors = None
         self.data = self.args.data
-
-    def prepare_data(self, data):
-        
-        X = self.data["comments"]
-        y = self.data["mbti"]  
-
-        X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.2, random_state=self.args.seed)
-        X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=self.args.seed)
-
-        return X_train, X_val, X_test, y_train, y_val, y_test
+        self.X_train = None
+        self.X_val = None
+        self.X_test = None
+        self.y_train = None
+        self.y_val = None
+        self.y_test = None
 
     def get_word_dict(self):
         df = pd.read_csv(self.data)
@@ -107,37 +121,44 @@ class TextModel:
         }
         vocab_size = len(word_to_index)
         return vocab_size
-    
+
+    def prepare_data(self):
+        for i in range(6):
+            file = f"./tokenized_{i}.csv"
+            if os.path.isfile(file):
+                data = pd.read_csv(file)
+                X = data["comments"]
+                y = data["mbti"]
+
+        self.X_train, X_temp, self.y_train, y_temp = train_test_split(
+            X, y, test_size=0.2, random_state=self.args.seed
+        )
+        self.X_val, self.X_test, self.y_val, self.y_test = train_test_split(
+            X_temp, y_temp, test_size=0.5, random_state=self.args.seed
+        )
+
     def get_word_vectors(self, sentences):
         word_vectors = []
         for sentence in sentences:
-            # word2vec_model을 활용하여 문장을 벡터화하여 word_vectors에 추가
-            vectorized_sentence = [self.word2vec_model.wv[word] for word in sentence if word in self.word2vec_model.wv]
+            vectorized_sentence = [
+                self.word2vec_model.wv[word]
+                for word in sentence
+                if word in self.word2vec_model.wv
+            ]
             word_vectors.append(vectorized_sentence)
         return word_vectors
-    
-    def vectorize_data(self, X_train, X_val, X_test):
+
+    def vectorize_data(self):
         # 데이터를 word vectors로 변환
-        train_word_vectors = self.get_word_vectors(X_train)
-        val_word_vectors = self.get_word_vectors(X_val)
-        test_word_vectors = self.get_word_vectors(X_test)
-
-        return train_word_vectors, val_word_vectors, test_word_vectors
-    
-    def train_model(self, word2vec_model):
-        # 데이터 불러오기
-        df = pd.read_csv(self.args.data)
-
-        # 데이터 준비
-        X_train, X_val, X_test, y_train, y_val, y_test = self.prepare_data(df)
-
-        # 데이터를 word vectors로 변환
-        train_word_vectors, val_word_vectors, test_word_vectors = self.vectorize_data(X_train, X_val, X_test)
+        self.prepare_data()
+        self.train_word_vectors = self.get_word_vectors(self.X_train)
+        self.val_word_vectors = self.get_word_vectors(self.X_val)
+        self.test_word_vectors = self.get_word_vectors(self.X_test)
 
     def data_loader(self):
         train_dataset = MyDataset(self.train_word_vectors)
         valid_dataset = MyDataset(self.val_word_vectors)
-        test_dataset = MyDataset(self.test_word_vectors)
+        test_dataset = MyDataset(self.test_word_vecstors)
 
         self.trn_loader = DataLoader(
             train_dataset, batch_size=50, shuffle=True, drop_last=False
@@ -192,7 +213,9 @@ class TextModel:
         N_EPOCHS=10,
         LR=0.001,
     ):
-        _, embedding_dim = self.vectors[0].shape
+        self.vectorize_data()
+        self.data_loader()
+        _, embedding_dim = self.train_word_vectors.shape
         VOCAB_SIZE = self.get_word_dict(self.data)
         # 모델 인스턴스 생성
         model = MyLSTM(
