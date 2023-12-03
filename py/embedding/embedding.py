@@ -2,15 +2,10 @@ import pandas as pd
 from gensim.models import Word2Vec
 import optuna
 
+
 class Embedding:
     def __init__(self, args, corpus):
-        self.args = args
-        self.df = pd.read_csv(corpus)
-        self.corpus = [
-            str(sentence).lower().split()
-            for sentence in self.df["comments"]
-            if pd.notnull(sentence)
-        ]
+        self.corpus = corpus  ## 단순리스트
 
     def objective(self, trial):
         vector_size = trial.suggest_int("vector_size", 10, 100)
@@ -34,7 +29,7 @@ class Embedding:
 
     def optimize_hyperparameters(self):
         study = optuna.create_study(direction="minimize")
-        study.optimize(self.objective, n_trials=100)
+        study.optimize(self.objective, n_trials=10)
         return study.best_params
 
     def train_word2vec_model(self, best_params):
@@ -57,6 +52,7 @@ class Embedding:
         best_params = self.optimize_hyperparameters()
         word2vec_model = self.train_word2vec_model(best_params)
         return word2vec_model
+
 
 if __name__ == "__main__":
     embedding = Embedding("./tokenized_0.csv")
