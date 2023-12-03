@@ -71,6 +71,7 @@ class Tokenizer:
             new_res = pd.DataFrame(res[i])
             new_res = new_res.swapaxes(axis1= 0, axis2=1)
             real_res = pd.concat([new_res,mbti],axis=1)
+            real_res = real_res.dropna()
             return real_res
 
 
