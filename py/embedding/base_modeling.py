@@ -124,11 +124,6 @@ class TextModel:
         return vocab_size
 
     def prepare_data(self):
-        # file = f"C:/Users/user/OneDrive/문서/dev/UROP/Crawling/tokenized_0.csv"
-        # if os.path.isfile(file):
-        #     data = pd.read_csv(file)
-        #     # print(data)
-        #     X = data["comments"]
         X = self.args.corpus
         y = pd.read_csv(self.data)["mbti"].values
 
