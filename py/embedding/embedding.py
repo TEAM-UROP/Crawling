@@ -1,11 +1,15 @@
-import pandas as pd
 from gensim.models import Word2Vec
 import optuna
 
 
 class Embedding:
-    def __init__(self, args, corpus):
-        self.corpus = corpus  ## 단순리스트
+    def __init__(self, args, sereis):
+        self.corpus = []
+        for i in sereis.values:
+            # temp = []
+            # print(i)
+            self.corpus.append(i.split(" "))
+        args.corpus = self.corpus
 
     def objective(self, trial):
         vector_size = trial.suggest_int("vector_size", 10, 100)
@@ -29,14 +33,15 @@ class Embedding:
 
     def optimize_hyperparameters(self):
         study = optuna.create_study(direction="minimize")
-        study.optimize(self.objective, n_trials=10)
+        study.optimize(self.objective, n_trials=1)
         return study.best_params
 
     def train_word2vec_model(self, best_params):
         model = Word2Vec(
             vector_size=best_params["vector_size"],
             window=best_params["window"],
-            min_count=best_params["min_count"],
+            # min_count=best_params["min_count"],
+            min_count=5,
             sg=best_params["sg"],
         )
         model.build_vocab(self.corpus)
