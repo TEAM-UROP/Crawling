@@ -15,6 +15,7 @@ def get_args_parser():
     parser.add_argument("--num_epochs", type=int, default=10)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--sp_option", type=str, default=False)
+    parser.add_argument("--corpus", type=str)
     return parser
 
 
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     for tokenized_sentences in res:
         embedding = Embedding(args, tokenized_sentences)
         w2v_model = embedding.get_embedding_model()
-        print(w2v_model.wv)
+        # print(w2v_model.wv)
         textmodel = TextModel(args, w2v_model)
         textmodel.train_model()
 
