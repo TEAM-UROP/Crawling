@@ -124,13 +124,13 @@ class TextModel:
         return vocab_size
 
     def prepare_data(self):
-        file = f"C:/Users/user/OneDrive/문서/dev/UROP/Crawling/tokenized_0.csv"
-        if os.path.isfile(file):
-            data = pd.read_csv(file)
-            # print(data)
-            X = data["comments"]
-
-        y = pd.read_csv(self.data)["mbti"]
+        # file = f"C:/Users/user/OneDrive/문서/dev/UROP/Crawling/tokenized_0.csv"
+        # if os.path.isfile(file):
+        #     data = pd.read_csv(file)
+        #     # print(data)
+        #     X = data["comments"]
+        X = self.args.corpus
+        y = pd.read_csv(self.data)["mbti"].values
 
         self.X_train, X_temp, self.y_train, y_temp = train_test_split(
             X, y, test_size=0.2, random_state=self.args.seed
@@ -144,15 +144,18 @@ class TextModel:
         word_vectors = []
         for sentence in sentences:
             try:
-                vectorized_sentence = [
-                    self.word2vec_model.wv[word]
-                    for word in sentence
-                    if word in self.word2vec_model.wv
-                ]
+                vectorized_sentence = []
+                for word in sentence:
+                    if word in self.word2vec_model.wv:
+                        vectorized_sentence.append(self.word2vec_model.wv[word])
+                    else:
+                        vectorized_sentence.append(
+                            np.zeros((self.word2vec_model.wv.vector_size))
+                        )
+                    # fix) np.zeros 말고 다른 방안을 생각해보자
             except:
-                vectorized_sentence = np.zeros((1, self.word2vec_model.wv.vector_size))
+                vectorized_sentence = np.zeros((self.word2vec_model.wv.vector_size))
             word_vectors.append(vectorized_sentence)
-            # break
         return word_vectors
 
     def vectorize_data(self):
@@ -176,10 +179,8 @@ class TextModel:
         model.train()
         trn_loss = 0
         for text, label in self.trn_loader:
-            x = torch.LongTensor(text).to(
-                0923
-                
-                self.device)
+            # x = torch.LongTensor(text).to(self.device)
+            x = text.to(self.device)
             y = torch.LongTensor(label).to(self.device)
             optimizer.zero_grad()
             y_pred_prob = model(x)
