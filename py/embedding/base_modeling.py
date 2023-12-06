@@ -69,7 +69,7 @@ class MyLSTM(nn.Module):
 class MyDataset(Dataset):
     def __init__(self, data, labels):
         self.data = data
-        self.labels = labels.reset_index(drop=True)
+        self.labels = labels
         # print(self.labels)
 
     def __len__(self):
@@ -126,9 +126,15 @@ class TextModel:
     def prepare_data(self):
         X = self.args.corpus
         y = pd.read_csv(self.data)["mbti"].values
-
+        labels = []
+        for i in y:
+            if "E" in str(i):
+                labels.append(0)
+            else:
+                labels.append(1)
+        # print(y)
         self.X_train, X_temp, self.y_train, y_temp = train_test_split(
-            X, y, test_size=0.2, random_state=self.args.seed
+            X, labels, test_size=0.2, random_state=self.args.seed
         )
         self.X_val, self.X_test, self.y_val, self.y_test = train_test_split(
             X_temp, y_temp, test_size=0.5, random_state=self.args.seed
@@ -175,7 +181,8 @@ class TextModel:
         trn_loss = 0
         for text, label in self.trn_loader:
             # x = torch.LongTensor(text).to(self.device)
-            x = text.to(self.device)
+            # x = torch.tensor(text).to(self.device)
+            x = [x.to(self.device) for x in text]
             y = torch.LongTensor(label).to(self.device)
             optimizer.zero_grad()
             y_pred_prob = model(x)
