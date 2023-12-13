@@ -4,11 +4,9 @@ import optuna
 
 class Embedding:
     def __init__(self, args, sereis):
-        # self.corpus = sereis
+        self.args = args
         self.corpus = []
         for i in sereis.values:
-            # temp = []
-            # print(i)
             self.corpus.append(i.split(" "))
         args.corpus = self.corpus
 
@@ -34,7 +32,7 @@ class Embedding:
 
     def optimize_hyperparameters(self):
         study = optuna.create_study(direction="minimize")
-        study.optimize(self.objective, n_trials=1)
+        study.optimize(self.objective, n_trials=self.args.n_trials)
         return study.best_params
 
     def train_word2vec_model(self, best_params):

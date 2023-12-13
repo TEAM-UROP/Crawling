@@ -26,7 +26,6 @@ class LSTMModel(nn.Module):
         self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
         self.fc = nn.Linear(hidden_size, output_size)
         self.hidden = self.init_hidden(batch_size)
-        self.cnt = 0
 
     def init_hidden(self, batch_size):
         return (
@@ -45,7 +44,7 @@ class LSTMModel(nn.Module):
         return output
 
 
-class Modeling:
+class LSTMModeling:
     def __init__(self, args, em_instance, word2vec_model, name):
         self.name = name
         self.em_instance = em_instance
@@ -60,12 +59,13 @@ class Modeling:
         self.input_size = self.word2vec_model.vector_size
         self.hidden_size = 16
         self.output_size = 1
-        self.batch_size = 256
+        self.batch_size = self.args.batch_size
         self.lstm_model = LSTMModel(
             self.input_size, self.hidden_size, self.output_size, self.batch_size
         )
+        self.num_epochs = self.args.num_epochs
         self.criterion = nn.BCEWithLogitsLoss()
-        self.optimizer = optim.Adam(self.lstm_model.parameters(), lr=0.001)
+        self.optimizer = optim.Adam(self.lstm_model.parameters(), lr=self.args.lr)
         self.df = None
         self.label = None
         self.train_loader = None
