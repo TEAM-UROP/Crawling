@@ -4,6 +4,7 @@ import optuna
 
 class Embedding:
     def __init__(self, args, sereis):
+        # self.corpus = sereis
         self.corpus = []
         for i in sereis.values:
             # temp = []
@@ -12,7 +13,7 @@ class Embedding:
         args.corpus = self.corpus
 
     def objective(self, trial):
-        vector_size = trial.suggest_int("vector_size", 10, 100)
+        vector_size = trial.suggest_int("vector_size", 10, 70)
         window = trial.suggest_int("window", 3, 10)
         min_count = trial.suggest_int("min_count", 5, 30)
         sg = trial.suggest_categorical("sg", [0])
