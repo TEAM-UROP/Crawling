@@ -34,7 +34,7 @@ class Embedding:
 
     def optimize_hyperparameters(self):
         study = optuna.create_study(direction="minimize")
-        study.optimize(self.objective, n_trials=1)
+        study.optimize(self.objective, n_trials=10)
         return study.best_params
 
     def train_word2vec_model(self, best_params):
