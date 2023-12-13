@@ -9,10 +9,12 @@ from CB import CBModeling
 def get_args_parser():
     parser = argparse.ArgumentParser(description="Run the pipeline")
     parser.add_argument("--data", type=str, default="data/sample_comment.csv")
-    parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--n_trials", type=int, default=10)
+    ######################
+    parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--corpus", type=str)
     parser.add_argument("--label", type=str)
     return parser
@@ -27,8 +29,7 @@ if __name__ == "__main__":
     for tokenized_sentences, name in res:
         embedding = Embedding(args, tokenized_sentences)
         w2v_model = embedding.get_embedding_model()
-        # for model in ["LSTM", "LR", "CatBoost"]:
-        for model in ["CatBoost"]:
+        for model in ["LSTM", "LR", "CatBoost"]:
             if model == "LSTM":
                 modeling = LSTMModeling(args, embedding, w2v_model, name)
                 modeling.train_and_evaluate(epochs=args.num_epochs)
