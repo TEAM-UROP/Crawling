@@ -24,8 +24,8 @@ if __name__ == "__main__":
 
     preprocessor = Tokenizer(args)
     res = preprocessor.tokenizing()
-    for tokenized_sentences in res:
+    for tokenized_sentences, name in res:
         embedding = Embedding(args, tokenized_sentences)
         w2v_model = embedding.get_embedding_model()
-        modeling = Modeling(args, embedding, w2v_model)
+        modeling = Modeling(args, embedding, w2v_model, name)
         modeling.train_and_evaluate()
