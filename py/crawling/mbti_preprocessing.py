@@ -25,8 +25,10 @@ def clean_and_save_data(input_file_path):
         new_text.append(cleaned_string)
     # 줄바꿈 제거
     result = pd.DataFrame({"mbti": mbti, "comments": new_text})
+    result = result.dropna()
     result['text'] = result['comments'].str.lower()
     result["comments"] = result["comments"].str.replace("\s+", " ", regex=True)
+    result = result.reset_index()
     return result
 
 
@@ -39,8 +41,10 @@ def clean_and_save_data2(input_file_path):
         cleaned_string = remove_punctuation(i)
         new_text.append(cleaned_string)
     result = pd.DataFrame({"mbti": mbti, "text": new_text})
+    result = result.dropna()
     result['text'] = result['text'].str.lower()
     result["text"] = result["text"].str.replace("\s+", " ", regex=True)
+    result = result.reset_index()
     return result
 
 
