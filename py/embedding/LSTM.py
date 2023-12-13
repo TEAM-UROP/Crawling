@@ -46,10 +46,16 @@ class LSTMModel(nn.Module):
 
 
 class Modeling:
-    def __init__(self, args, em_instance, word2vec_model):
+    def __init__(self, args, em_instance, word2vec_model, name):
+        self.name = name
         self.em_instance = em_instance
         self.args = args
-        self.corpus = [x for x in args.corpus if x != ["nan"]]
+        self.corpus = []
+        self.index = []
+        for idx, item in enumerate(args.corpus):
+            if str(item) != "['']" and item != ["nan"]:
+                self.index.append(idx)
+                self.corpus.append(item)
         self.word2vec_model = word2vec_model
         self.input_size = self.word2vec_model.vector_size
         self.hidden_size = 16
@@ -90,9 +96,8 @@ class Modeling:
             self.args.data,
             encoding="utf-8",
         )
-        temp = data[["mbti", "comments"]]
-        self.df = temp.dropna().reset_index(drop=True)
-        # self.df = temp.sample(frac=1).reset_index(drop=True)
+        self.df = data[["mbti", "comments"]]
+        self.df = self.df.iloc[self.index].reset_index(drop=True)
         for i in range(len(self.df)):
             if "E" in self.df.loc[i, "mbti"]:
                 self.df.loc[i, "mbti"] = 0
@@ -135,6 +140,10 @@ class Modeling:
             print(
                 f"TRAIN : Epoch {epoch+1}/{epochs}, Loss: {running_loss / len(self.train_loader)}"
             )
+            with open(f"LSTM_result({self.name}).txt", "a", encoding="utf-8") as f:
+                f.write(
+                    f"TRAIN : Epoch {epoch+1}/{epochs}, Loss: {running_loss / len(self.train_loader)}\n"
+                )
 
     def evaluate(self):
         self.lstm_model.eval()
@@ -161,36 +170,12 @@ class Modeling:
         for epoch in range(epochs):
             self.get_dataloader()
             print(f"Epoch {epoch+1}/{epochs}")
+            with open(f"LSTM_result({self.name}).txt", "a", encoding="utf-8") as f:
+                f.write(f"Epoch {epoch+1}/{epochs}\n")
             self.train(epochs=5)
             eval_loss, eval_accuracy = self.evaluate()
             print(f"Validation Loss: {eval_loss}, Validation Accuracy: {eval_accuracy}")
-
-
-# if __name__ == "__main__":
-# data = pd.read_csv(
-#     "C:/Users/user/OneDrive/문서/dev/UROP/Crawling/data/sample_comment.csv",
-#     encoding="utf-8",
-# )
-# token = pd.read_csv(
-#     "C:/Users/user/OneDrive/문서/dev/UROP/Crawling/tokenized_0.csv",
-#     encoding="utf-8",
-# )
-# data = pd.read_csv(
-#     "C:/Users/user/OneDrive/문서/dev/UROP/Crawling/py/embedding/newnew1.csv",
-#     encoding="utf-8",
-# )
-# df = data[["mbti", "comments"]]
-# df = df.dropna().reset_index(drop=True)
-# df = df.sample(frac=1).reset_index(drop=True)
-
-# token = token.dropna().reset_index(drop=True)
-
-# for i in range(len(df)):
-#     if "E" in df.loc[i, "mbti"]:
-#         df.loc[i, "mbti"] = 0
-#     else:
-#         df.loc[i, "mbti"] = 1
-
-# self.train_and_evaluate(
-#     lstm_model, criterion, optimizer, train_loader, val_loader, epochs=2
-# )
+            with open(f"LSTM_result({self.name}).txt", "a", encoding="utf-8") as f:
+                f.write(
+                    f"Validation Loss: {eval_loss}, Validation Accuracy: {eval_accuracy}\n"
+                )
