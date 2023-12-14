@@ -28,7 +28,8 @@ def clean_and_save_data(input_file_path):
     result['comments'] = result['comments'].str.lower()
     result["comments"] = result["comments"].str.replace("\s+", " ", regex=True)
     result["comments"] = result["comments"].str.strip()
-    result = result.dropna()
+    result = result.dropna(axis=0, how='any')
+    result = result[result['comments'].str.len() > 3]
     result = result.reset_index(drop= True)
     return result
 
@@ -45,7 +46,8 @@ def clean_and_save_data2(input_file_path):
     result['text'] = result['text'].str.lower()
     result["text"] = result["text"].str.replace("\s+", " ", regex=True)
     result["text"] = result["text"].str.strip()
-    result = result.dropna()
+    result = result.dropna(axis=0, how='any')
+    result = result[result['text'].str.len() > 3]
     result = result.reset_index(drop= True)
     return result
 
