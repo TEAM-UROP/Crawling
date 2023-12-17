@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 from catboost import CatBoostClassifier
 
 
@@ -46,13 +46,13 @@ class CBModeling:
             self.args.data,
             encoding="utf-8",
         )
-        self.df = data[["mbti", "comments"]]
+        self.df = data[["mbti", "text"]]
         self.df = self.df.iloc[self.index].reset_index(drop=True)
         for i in range(len(self.df)):
             if "E" in self.df.loc[i, "mbti"]:
-                self.df.loc[i, "mbti"] = 0
-            else:
                 self.df.loc[i, "mbti"] = 1
+            else:
+                self.df.loc[i, "mbti"] = 0
         self.label = [int(i) for i in self.df["mbti"].values.tolist()]
 
     def get_dataloader(self):
@@ -87,12 +87,12 @@ class CBModeling:
                 x_train_re, y_train, eval_set=(x_val_re, y_val), verbose=False
             )
             catboost_preds = catboost_model.predict(x_val_re)
-            accuracy = accuracy_score(y_val, catboost_preds)
-            if accuracy > best_score:
-                best_score = accuracy
+            f1 = f1_score(y_val, catboost_preds)
+            if f1 > best_score:
+                best_score = f1
             print(f"Epoch {epoch+1}/{epochs}")
-            print(f"Validation Accuracy: {best_score}")
+            print(f"Validation F1 Score: {best_score}")
             with open(f"CB_result({self.name}).txt", "a", encoding="utf-8") as f:
                 f.write(
-                    f"Epoch {epoch+1}/{epochs}\nValidation Accuracy: {best_score}\n"
+                    f"Epoch {epoch+1}/{epochs}\nValidation F1 Score: {best_score}\n"
                 )
