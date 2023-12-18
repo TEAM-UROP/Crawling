@@ -5,9 +5,16 @@ import optuna
 class Embedding:
     def __init__(self, args, sereis):
         self.args = args
+        # self.corpus = []
+        # for i in sereis.values:
+        #     self.corpus.append(i.split(" "))
         self.corpus = []
-        for i in sereis.values:
-            self.corpus.append(i.split(" "))
+        try:
+            for i in sereis.values:
+                self.corpus.append(i.split(" "))
+        except:
+            for i in sereis["text"].values:
+                self.corpus.append(i.split(" "))
         args.corpus = self.corpus
 
     def objective(self, trial):
