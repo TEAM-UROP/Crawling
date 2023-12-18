@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 from sklearn.metrics import f1_score
 
+
 class MyDataset(Dataset):
     def __init__(self, data, labels):
         self.data = data
@@ -151,7 +152,6 @@ class LSTMModeling:
         # total_corrects = 0
         all_preds = []
         all_labels = []
-
         with torch.no_grad():
             for inputs, labels in self.val_loader:
                 outputs = self.lstm_model(inputs)
@@ -160,12 +160,13 @@ class LSTMModeling:
                 preds = outputs.round()
                 all_preds.extend(preds.cpu().numpy().flatten())
                 all_labels.extend(labels.cpu().numpy())
+                all_labels = [int(i) for i in all_labels]
                 with open("pred.txt", "a", encoding="utf-8") as f:
                     f.write(str(preds) + "\n")
                 # ans = preds == labels.data
                 # for i in range(len(ans[0])):
-                    # if ans[0][i] == True:
-                        # total_corrects += 1
+                # if ans[0][i] == True:
+                # total_corrects += 1
         avg_loss = total_loss / len(self.val_loader)
         # accuracy = total_corrects / len(self.val_loader.dataset)
         f1 = f1_score(all_labels, all_preds)
