@@ -12,7 +12,7 @@ def get_args_parser():
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--n_trials", type=int, default=10)
+    parser.add_argument("--n_trials", type=int, default=5)
     ######################
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--corpus", type=str)
