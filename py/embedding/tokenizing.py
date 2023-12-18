@@ -9,25 +9,25 @@ class Tokenizer:
         self.okt = Okt()
         self.kkma = Kkma()
         self.hannanum = Hannanum()
-        self.data["comments"] = self.data["comments"].astype(str)
+        self.data["text"] = self.data["text"].astype(str)
 
     def tokenizing(self):
-        okt_morphs = self.data["comments"].apply(
+        okt_morphs = self.data["text"].apply(
             lambda row: " ".join(self.okt.morphs(row))
         )
-        okt_nouns = self.data["comments"].apply(
+        okt_nouns = self.data["text"].apply(
             lambda row: " ".join(self.okt.nouns(row))
         )
-        kkma_morphs = self.data["comments"].apply(
+        kkma_morphs = self.data["text"].apply(
             lambda row: " ".join(self.kkma.morphs(row))
         )
-        kkma_nouns = self.data["comments"].apply(
+        kkma_nouns = self.data["text"].apply(
             lambda row: " ".join(self.kkma.nouns(row))
         )
-        hannaum_morphs = self.data["comments"].apply(
+        hannaum_morphs = self.data["text"].apply(
             lambda row: " ".join(self.hannanum.morphs(row))
         )
-        hannaum_nouns = self.data["comments"].apply(
+        hannaum_nouns = self.data["text"].apply(
             lambda row: " ".join(self.hannanum.morphs(row))
         )
         res = (

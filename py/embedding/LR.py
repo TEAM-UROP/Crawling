@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 from sklearn.linear_model import LogisticRegression
 import torch
 import LSTM as lstmpy
@@ -57,13 +57,13 @@ class LRModeling:
             self.args.data,
             encoding="utf-8",
         )
-        self.df = data[["mbti", "comments"]]
+        self.df = data[["mbti", "text"]]
         self.df = self.df.iloc[self.index].reset_index(drop=True)
         for i in range(len(self.df)):
             if "E" in self.df.loc[i, "mbti"]:
-                self.df.loc[i, "mbti"] = 0
-            else:
                 self.df.loc[i, "mbti"] = 1
+            else:
+                self.df.loc[i, "mbti"] = 0
         self.label = [int(i) for i in self.df["mbti"].values.tolist()]
 
     def get_dataloader(self):
@@ -92,6 +92,9 @@ class LRModeling:
     def evaluate(self):
         total_accuracy = 0
         cnt = 0
+        all_preds = []
+        all_labels = []
+
         for i in range(0, len(self.val_data), self.args.batch_size):
             inputs = self.val_data[i : i + self.args.batch_size]
             reduction = []
@@ -99,13 +102,15 @@ class LRModeling:
                 reduction.append(np.mean(j, axis=1))
             labels = self.val_label[i : i + self.args.batch_size]
             outputs = self.model.predict(reduction)
+            all_preds.extend(outputs)
+            all_labels.extend(labels)
             with open("LR_pred.txt", "a", encoding="utf-8") as f:
                 f.write(str(outputs) + "\n")
-            accuracy = accuracy_score(labels, outputs)
-            total_accuracy += accuracy
-            cnt += 1
-        avg_accuracy = total_accuracy / cnt
-        return avg_accuracy
+            # accuracy = accuracy_score(labels, outputs)
+            # total_accuracy += accuracy
+            # cnt += 1
+        f1 = f1_score(all_labels, all_preds)
+        return f1
 
     def train_and_evaluate(self, epochs=5):
         for epoch in range(epochs):
@@ -114,7 +119,7 @@ class LRModeling:
             with open(f"LR_result({self.name}).txt", "a", encoding="utf-8") as f:
                 f.write(f"Epoch {epoch+1}/{epochs}\n")
             self.train(epochs=5)
-            eval_accuracy = self.evaluate()
-            print(f"Validation Accuracy: {eval_accuracy}")
+            eval_f1 = self.evaluate()
+            print(f"Validation F1 Score: {eval_f1}")
             with open(f"LR_result({self.name}).txt", "a", encoding="utf-8") as f:
-                f.write(f"Validation Accuracy: {eval_accuracy}\n")
+                f.write(f"Validation F1 Score: {eval_f1}\n")

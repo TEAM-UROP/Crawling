@@ -15,7 +15,7 @@ def remove_punctuation(input_string):
     return result
 
 
-def clean_and_save_data(input_file_path):
+def clean_and_save_data(input_file_path): 
     comment = pd.read_csv(input_file_path)
     mbti = comment["mbti"]
     comments = comment["comments"]
@@ -34,7 +34,7 @@ def clean_and_save_data(input_file_path):
     return result
 
 
-def clean_and_save_data2(input_file_path):
+def clean_and_save_data2(input_file_path): 
     post = pd.read_csv(input_file_path)
     mbti = post["mbti"]
     text = post["text"]

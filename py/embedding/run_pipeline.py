@@ -8,7 +8,7 @@ from CB import CBModeling
 
 def get_args_parser():
     parser = argparse.ArgumentParser(description="Run the pipeline")
-    parser.add_argument("--data", type=str, default="data/sample_comment.csv")
+    parser.add_argument("--data", type=str, default="data/sample_post.csv")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--num_epochs", type=int, default=5)
     parser.add_argument("--lr", type=float, default=1e-3)

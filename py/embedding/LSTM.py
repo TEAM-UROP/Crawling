@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
+from sklearn.metrics import f1_score
 
 
 class MyDataset(Dataset):
@@ -96,13 +97,13 @@ class LSTMModeling:
             self.args.data,
             encoding="utf-8",
         )
-        self.df = data[["mbti", "comments"]]
+        self.df = data[["mbti", "text"]]
         self.df = self.df.iloc[self.index].reset_index(drop=True)
         for i in range(len(self.df)):
             if "E" in self.df.loc[i, "mbti"]:
-                self.df.loc[i, "mbti"] = 0
-            else:
                 self.df.loc[i, "mbti"] = 1
+            else:
+                self.df.loc[i, "mbti"] = 0
         self.label = [int(i) for i in self.df["mbti"].values.tolist()]
 
     def get_dataloader(self):
@@ -148,23 +149,29 @@ class LSTMModeling:
     def evaluate(self):
         self.lstm_model.eval()
         total_loss = 0.0
-        total_corrects = 0
+        # total_corrects = 0
+        all_preds = []
+        all_labels = []
         with torch.no_grad():
             for inputs, labels in self.val_loader:
                 outputs = self.lstm_model(inputs)
                 loss = self.criterion(outputs.squeeze(), labels.float())
                 total_loss += loss.item()
                 preds = outputs.round()
+                all_preds.extend(preds.cpu().numpy().flatten())
+                all_labels.extend(labels.cpu().numpy())
+                all_labels = [int(i) for i in all_labels]
                 with open("pred.txt", "a", encoding="utf-8") as f:
                     f.write(str(preds) + "\n")
-                ans = preds == labels.data
-                for i in range(len(ans[0])):
-                    if ans[0][i] == True:
-                        total_corrects += 1
+                # ans = preds == labels.data
+                # for i in range(len(ans[0])):
+                # if ans[0][i] == True:
+                # total_corrects += 1
         avg_loss = total_loss / len(self.val_loader)
-        accuracy = total_corrects / len(self.val_loader.dataset)
+        # accuracy = total_corrects / len(self.val_loader.dataset)
+        f1 = f1_score(all_labels, all_preds)
         # print(f"Loss: {avg_loss}, Accuracy: {accuracy}")
-        return avg_loss, accuracy
+        return avg_loss, f1
 
     def train_and_evaluate(self, epochs=5):
         for epoch in range(epochs):
@@ -173,9 +180,10 @@ class LSTMModeling:
             with open(f"LSTM_result({self.name}).txt", "a", encoding="utf-8") as f:
                 f.write(f"Epoch {epoch+1}/{epochs}\n")
             self.train(epochs=5)
-            eval_loss, eval_accuracy = self.evaluate()
-            print(f"Validation Loss: {eval_loss}, Validation Accuracy: {eval_accuracy}")
+            # eval_loss, eval_accuracy = self.evaluate()
+            eval_loss, eval_f1 = self.evaluate()
+            print(f"Validation Loss: {eval_loss}, Validation F1 Score: {eval_f1}")
             with open(f"LSTM_result({self.name}).txt", "a", encoding="utf-8") as f:
                 f.write(
-                    f"Validation Loss: {eval_loss}, Validation Accuracy: {eval_accuracy}\n"
+                    f"Validation Loss: {eval_loss}, Validation F1 Score: {eval_f1}\n"
                 )
